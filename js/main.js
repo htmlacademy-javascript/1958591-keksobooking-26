@@ -1,4 +1,6 @@
-import { createAccomodations } from './data.js';
+import { createAccomodationCards } from './cards.js';
 
-export { createAccomodations };
+const ACCOMODATION_COUNT = 10;
+
+createAccomodationCards(ACCOMODATION_COUNT);
 

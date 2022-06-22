@@ -67,8 +67,4 @@ const createIdGenerator = () => {
  */
 const generateAccomodationNumber = createIdGenerator();
 
-export { getRandomInteger };
-export { getRandomFloat };
-export { getRandomArrayElement };
-export { getRandomElements };
-export { generateAccomodationNumber };
+export { getRandomInteger, getRandomFloat, getRandomArrayElement, getRandomElements, generateAccomodationNumber };
