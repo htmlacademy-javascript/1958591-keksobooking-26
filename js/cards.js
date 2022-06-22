@@ -1,5 +1,10 @@
 import { createAccomodations } from './mocks/data.js';
 
+/**
+ * Возвращает строку - подпись для типа жилья
+ * @param {String} accommodationType - тип жилья
+ * @returns {String} - искомая строка
+ */
 const getAccommodationType = (accommodationType) => {
   switch (accommodationType) {
     case 'bungalow':
@@ -17,6 +22,11 @@ const getAccommodationType = (accommodationType) => {
   }
 };
 
+/**
+ * Возвращает строку - слово "комната" в правильном падеже (в зависимости от количества комнат)
+ * @param {String} rooms - количество комнат
+ * @returns {String} - искомая строка
+ */
 const getRoomCase = (rooms) => {
   switch (rooms) {
     case 1:
@@ -32,6 +42,11 @@ const getRoomCase = (rooms) => {
   }
 };
 
+/**
+ * Возвращает строку - слово "гость" в правильном падеже (в зависимости от количества гостей)
+ * @param {String} guests - количество гостей
+ * @returns {String} - искомая строка
+ */
 const getGuestCase = (guests) => {
   switch (guests) {
     case 1:
@@ -41,6 +56,14 @@ const getGuestCase = (guests) => {
   }
 };
 
+/**
+ * Возвращает false, если если в объекте есть нужное свойство; если свойство неопределено,
+ * скрывает соответствующий свойству блок в переданном DOM-элементе и возвращает true.
+ * @param {String} element - текущий DOM-элемент
+ * @param {String} selector - блок
+ * @param {String} key - свойство объекта
+ * @returns {boolean}
+ */
 const hideBlock = (element, selector, key) => {
   if (key === undefined) {
     element.querySelector(selector).classList.add('visually-hidden');
@@ -49,6 +72,10 @@ const hideBlock = (element, selector, key) => {
   return false;
 };
 
+/**
+ *Создает необходимое количество DOM-элементов и заполняет их данными
+ * @param {Number} cardAmount - необходимое число DOM-элементов
+ */
 const createAccomodationCards = (cardAmount) => {
   const placeForCards = document.querySelector('#map-canvas');
   const cardTemplate = document.querySelector('#card')
