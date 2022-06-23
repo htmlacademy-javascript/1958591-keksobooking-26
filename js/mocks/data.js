@@ -1,8 +1,4 @@
-import { getRandomInteger } from './util.js';
-import { getRandomFloat } from './util.js';
-import { getRandomArrayElement } from './util.js';
-import { getRandomElements } from './util.js';
-import { generateAccomodationNumber } from './util.js';
+import { getRandomInteger, getRandomFloat, getRandomArrayElement, getRandomElements, generateAccomodationNumber } from './util.js';
 
 const TITLES = [
   'Комфортабельное проживание в красивом районе',
@@ -58,8 +54,6 @@ const PHOTOS = [
   'https://assets.htmlacademy.ru/content/intensive/javascript-1/keksobooking/claire-rendall-b6kAwr1i0Iw.jpg',
 ];
 
-const ACCOMODATION_COUNT = 10;
-
 /**
  *Возвращает объект accomodation.
  * @returns {Object} - искомый объект
@@ -75,10 +69,10 @@ const getAccomodation = () => {
     offer: {
       title: getRandomArrayElement(TITLES),
       address: `${randomLat} ${randomLng}`,
-      price: getRandomInteger(0, Number.MAX_VALUE),
+      price: getRandomInteger(100, 10000),
       type: getRandomArrayElement(ACCOMODATION_TYPES),
-      rooms: getRandomInteger(0, Number.MAX_VALUE),
-      guests: getRandomInteger(0, Number.MAX_VALUE),
+      rooms: getRandomInteger(1, 10),
+      guests: getRandomInteger(1, 10),
       checkin: getRandomArrayElement(CHECKINS),
       checkout: getRandomArrayElement(CHECKOUTS),
       features: getRandomElements(FEATURS),
@@ -95,7 +89,7 @@ const getAccomodation = () => {
 /**
  *Возвращает массив объектов заданной длины. Объекты создаются с помощью  callback-функции getAccomodation.
  */
-const createAccomodations = () => Array.from({ length: ACCOMODATION_COUNT }, getAccomodation);
+const createAccomodations = (accomodationAmount) => Array.from({ length: accomodationAmount }, getAccomodation);
 
 export { createAccomodations };
 
