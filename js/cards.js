@@ -105,9 +105,37 @@ const removeSpareFeatures = (element, selectorContainer, selectorItem, itemNames
       featureItem.remove();
     }
   });
-
 };
 
+/**
+ * Возвращает строку для заполнения элемента шаблона '.popup__text--price'
+ * @param {String} price - прайс
+ * @returns {String} - искомая строка
+ */
+const getPrice = (price) => `${price}  ₽/ночь`;
+
+/**
+ * Возвращает строку для заполнения элемента шаблона '.popup__text--сapacity'
+ * @param {String} rooms - число комнат
+ * @param {String} guests - число гостей
+ * @returns {String} - искомая строка
+ */
+const getCapacity = (rooms, guests) => `${getNounCase(rooms, ['комната', 'комнаты', 'комнат'])} для ${getNounCase(guests, ['гостя', 'гостей', 'гостей'])}`;
+
+/**
+ * Возвращает строку для заполнения элемента шаблона '.popup__text--time'
+ * @param {String} checkin - время заезда
+ * @param {String} checkout - время выезда
+ * @returns {String} - искомая строка
+ */
+const getTime = (checkin, checkout) => `Заезд после ${checkin}, выезд до ${checkout}`;
+
+/**
+ * Возвращает строку для заполнения элемента шаблона '.popup__type'
+ * @param {String} type - тип жилья
+ * @returns {String} - искомая строка
+ */
+const getType = (type) => AccommodationType[type.toUpperCase()];
 /**
  *Создает необходимое количество DOM-элементов и заполняет их данными заранее подготовленного массива объектов
  * @param {Array} accomodationCards - массив объектов с данными для заполнения DOM-элементов
@@ -122,22 +150,15 @@ const createAccomodationCards = (accomodationCards) => {
 
   accomodationCards.forEach(({ offer, author }, accomodationIndex) => {
     const accomodationElement = cardTemplate.cloneNode(true);
+
     makeContent(accomodationElement, '.popup__title', 'textContent', [offer.title], offer.title);
     makeContent(accomodationElement, '.popup__text--address', 'textContent', [offer.address], offer.address);
-
-    let propertyContent = `${offer.price}  ₽/ночь`;
-    makeContent(accomodationElement, '.popup__text--price', 'textContent', [offer.price], propertyContent);
-
-    propertyContent = `${getNounCase(offer.rooms, ['комната', 'комнаты', 'комнат'])} для ${getNounCase(offer.guests, ['гостя', 'гостей', 'гостей'])}`;
-    makeContent(accomodationElement, '.popup__text--capacity', 'textContent', [offer.rooms, offer.guests], propertyContent);
-
-    propertyContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
-    makeContent(accomodationElement, '.popup__text--time', 'textContent', [offer.checkin, offer.checkout], propertyContent);
+    makeContent(accomodationElement, '.popup__text--price', 'textContent', [offer.price], getPrice(offer.price));
+    makeContent(accomodationElement, '.popup__text--capacity', 'textContent', [offer.rooms, offer.guests], getCapacity(offer.rooms, offer.guests));
+    makeContent(accomodationElement, '.popup__text--time', 'textContent', [offer.checkin, offer.checkout], getTime(offer.checkin, offer.checkout));
     makeContent(accomodationElement, '.popup__description', 'textContent', [offer.description], offer.description);
     makeContent(accomodationElement, '.popup__avatar', 'src', [author.avatar], author.avatar);
-
-    propertyContent = AccommodationType[offer.type.toUpperCase()];
-    makeContent(accomodationElement, '.popup__type', 'textContent', [offer.type], propertyContent);
+    makeContent(accomodationElement, '.popup__type', 'textContent', [offer.type], getType(offer.type));
 
     fillPictures(accomodationElement, '.popup__photos', '.popup__photo', offer.photos);
     removeSpareFeatures(accomodationElement, '.popup__features', '.popup__feature', offer.features);
@@ -150,3 +171,4 @@ const createAccomodationCards = (accomodationCards) => {
 };
 
 export { createAccomodationCards };
+
