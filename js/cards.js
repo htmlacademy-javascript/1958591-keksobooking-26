@@ -1,147 +1,148 @@
-import { createAccomodations } from './mocks/data.js';
+const AccommodationType = {
+  BUNGALOW: 'Бунгало',
+  FLAT: 'Квартира',
+  HOTEL: 'Отель',
+  HOUSE: 'Дом',
+  PALACE: 'Дворец'
+};
 
 /**
- * Возвращает строку - подпись для типа жилья
- * @param {String} accommodationType - тип жилья
+ * Возвращает строку, содержащую переданное числительное + существительное в
+ *  правильной форме
+ * @param {String} numeral - числительное
+ * @param {Massive} nounCases - массив строк из трех значений - существительное в именительном падеже, родительном падеже, во множественном числе
  * @returns {String} - искомая строка
  */
-const getAccommodationType = (accommodationType) => {
-  switch (accommodationType) {
-    case 'bungalow':
-      return 'Бунгало';
-    case 'flat':
-      return 'Квартира';
-    case 'hotel':
-      return 'Отель';
-    case 'house':
-      return 'Дом';
-    case 'palace':
-      return 'Дворец';
+const getNounCase = (numeral, nounCases) => {
+  const twoDigitNumber = numeral.toString().substring(numeral.toString().length - 2);
+  const oneDigitNumber = numeral.toString().substring(numeral.toString().length - 1);
+  if ((twoDigitNumber > 10) && (twoDigitNumber < 15)) {
+    return `${numeral} ${nounCases[2]}`;
+  }
+  switch (oneDigitNumber) {
+    case '1':
+      return `${numeral} ${nounCases[0]}`;
+    case '2':
+      return `${numeral} ${nounCases[1]}`;
+    case '3':
+      return `${numeral} ${nounCases[1]}`;
+    case '4':
+      return `${numeral} ${nounCases[1]}`;
     default:
-      return 'Отель';
+      return `${numeral} ${nounCases[2]}`;
   }
 };
 
 /**
- * Возвращает строку - слово "комната" в правильном падеже (в зависимости от количества комнат)
- * @param {String} rooms - количество комнат
- * @returns {String} - искомая строка
+ * Заполняет указанное свойство переданного элемента *
+ * @param {Object} elementParent - текущий DOM-элемент (родитель)
+ * @param {String} сhildSelector - селектор элемента (ребенка), куда помещаются данные
+ * @param {String} childProperty - заполняемое свойство ('src' или 'textContent')
+ * @param {Array} childFields - поля объекта с данными для проверки (определены эти поля с данными или нет)
+ * @param {Array} childContent - строка с адресом картинки или текстовая строка для свойства textContent
  */
-const getRoomCase = (rooms) => {
-  switch (rooms) {
-    case 1:
-      return 'комната';
-    case 2:
-      return 'комнаты';
-    case 3:
-      return 'комнаты';
-    case 4:
-      return 'комнаты';
-    default:
-      return 'комнат';
-  }
+const makeContent = (elementParent, сhildSelector, childProperty, childFields, childContent) => {
+  childFields.forEach((childField) => {
+    if (childField === undefined) {
+      elementParent.querySelector(сhildSelector).classList.add('hidden');
+      return false;
+    }
+  });
+  elementParent.querySelector(сhildSelector)[childProperty] = childContent;
 };
 
 /**
- * Возвращает строку - слово "гость" в правильном падеже (в зависимости от количества гостей)
- * @param {String} guests - количество гостей
- * @returns {String} - искомая строка
+ * Помещает картинки из переданного массива (если он определен) в шаблон с данными,
+ * создает в шаблоне дополнительную разметку для картинок, если их больше, чем одна
+ * @param {Object} element - текущий DOM-элемент
+ * @param {String} selectorContainer - селектор контейнера картинок
+ * @param {String} selectorPicture - селектор картинки
+ * @param {Array} pictures - массив картинок
  */
-const getGuestCase = (guests) => {
-  switch (guests) {
-    case 1:
-      return 'гостя';
-    default:
-      return 'гостей';
+const fillPictures = (element, selectorContainer, selectorPicture, pictures) => {
+
+  if (pictures === undefined) {
+    element.querySelector(selectorContainer).classList.add('hidden');
+    return false;
   }
+  pictures.forEach((picture, index) => {
+    const photoList = element.querySelector(selectorContainer);
+    const photoItem = photoList.querySelector(selectorPicture);
+    if (index === 0) {
+      photoItem.src = picture;
+    }
+    else {
+      const photoItemAdditional = photoItem.cloneNode(true);
+      photoItemAdditional.src = picture;
+      photoList.append(photoItemAdditional);
+    }
+  });
 };
 
 /**
- * Возвращает false, если если в объекте есть нужное свойство; если свойство неопределено,
- * скрывает соответствующий свойству блок в переданном DOM-элементе и возвращает true.
- * @param {String} element - текущий DOM-элемент
- * @param {String} selector - блок
- * @param {String} key - свойство объекта
- * @returns {boolean}
+ * Удаляет лишние элементы из контейнера - оставляет только те элементы, имена которых есть в переданном массиве
+ * @param {Object} element - текущий DOM-элемент
+ * @param {String} selectorContainer - селектор контейнера
+ * @param {String} selectorItem - селектор элемента
+ * @param {Array} itemNames - массив имен элементов
  */
-const hideBlock = (element, selector, key) => {
-  if (key === undefined) {
-    element.querySelector(selector).classList.add('visually-hidden');
-    return true;
+const removeSpareFeatures = (element, selectorContainer, selectorItem, itemNames) => {
+
+  if (itemNames === undefined) {
+    element.querySelector(selectorContainer).classList.add('hidden');
+    return false;
   }
-  return false;
+
+  const featureContainer = element.querySelector(selectorContainer);
+  const featureList = featureContainer.querySelectorAll(selectorItem);
+
+  featureList.forEach((featureItem) => {
+    const isAvailable = itemNames.some(
+      (itemName) => featureItem.classList.contains(`${selectorItem.substring(1)}--${itemName}`),
+    );
+
+    if (!isAvailable) {
+      featureItem.remove();
+    }
+  });
+
 };
 
 /**
- *Создает необходимое количество DOM-элементов и заполняет их данными
- * @param {Number} cardAmount - необходимое число DOM-элементов
+ *Создает необходимое количество DOM-элементов и заполняет их данными заранее подготовленного массива объектов
+ * @param {Array} accomodationCards - массив объектов с данными для заполнения DOM-элементов
  */
-const createAccomodationCards = (cardAmount) => {
+const createAccomodationCards = (accomodationCards) => {
   const placeForCards = document.querySelector('#map-canvas');
   const cardTemplate = document.querySelector('#card')
     .content
     .querySelector('.popup');
 
-  const accomodationCards = createAccomodations(cardAmount);
   const accomodationCardFragment = document.createDocumentFragment();
 
   accomodationCards.forEach(({ offer, author }, accomodationIndex) => {
     const accomodationElement = cardTemplate.cloneNode(true);
-    if (!hideBlock(accomodationElement, '.popup__title', offer.title)) {
-      accomodationElement.querySelector('.popup__title').textContent = offer.title;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--address', offer.address)) {
-      accomodationElement.querySelector('.popup__text--address').textContent = offer.address;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--price', offer.price)) {
-      accomodationElement.querySelector('.popup__text--price').textContent = `${offer.price}  ₽/ночь`;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--capacity', offer.rooms) || !hideBlock(accomodationElement, '.popup__text--capacity', offer.guests)) {
-      accomodationElement.querySelector('.popup__text--capacity').textContent = `${offer.rooms} ${getRoomCase(offer.rooms)} для ${offer.guests} ${getGuestCase(offer.guests)}`;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--time', offer.checkin) || !hideBlock(accomodationElement, '.popup__text--time', offer.checkout)) {
-      accomodationElement.querySelector('.popup__text--time').textContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
-    }
-    if (!hideBlock(accomodationElement, '.popup__description', offer.description)) {
-      accomodationElement.querySelector('.popup__description').textContent = offer.description;
-    }
+    makeContent(accomodationElement, '.popup__title', 'textContent', [offer.title], offer.title);
+    makeContent(accomodationElement, '.popup__text--address', 'textContent', [offer.address], offer.address);
 
-    accomodationElement.querySelector('.popup__avatar').src = author.avatar;
+    let propertyContent = `${offer.price}  ₽/ночь`;
+    makeContent(accomodationElement, '.popup__text--price', 'textContent', [offer.price], propertyContent);
 
-    accomodationElement.querySelector('.popup__type').textContent = getAccommodationType(offer.type);
+    propertyContent = `${getNounCase(offer.rooms, ['комната', 'комнаты', 'комнат'])} для ${getNounCase(offer.guests, ['гостя', 'гостей', 'гостей'])}`;
+    makeContent(accomodationElement, '.popup__text--capacity', 'textContent', [offer.rooms, offer.guests], propertyContent);
 
-    if (!hideBlock(accomodationElement, '.popup__photos', offer.photos)) {
-      offer.photos.forEach((photos, index) => {
-        const photoList = accomodationElement.querySelector('.popup__photos');
-        const photoItem = accomodationElement.querySelector('.popup__photo');
-        if (index === 0) {
-          photoItem.src = photos;
-        }
-        else {
-          const photoItemAdditional = photoItem.cloneNode(true);
-          photoItemAdditional.src = photos;
-          photoList.append(photoItemAdditional);
-        }
-      });
-    }
+    propertyContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
+    makeContent(accomodationElement, '.popup__text--time', 'textContent', [offer.checkin, offer.checkout], propertyContent);
+    makeContent(accomodationElement, '.popup__description', 'textContent', [offer.description], offer.description);
+    makeContent(accomodationElement, '.popup__avatar', 'src', [author.avatar], author.avatar);
 
-    if (!hideBlock(accomodationElement, '.popup__features', offer.features)) {
-      const userFeatures = offer.features;
-      const featureContainer = accomodationElement.querySelector('.popup__features');
-      const featureList = featureContainer.querySelectorAll('.popup__feature');
+    propertyContent = AccommodationType[offer.type.toUpperCase()];
+    makeContent(accomodationElement, '.popup__type', 'textContent', [offer.type], propertyContent);
 
-      featureList.forEach((featureItem) => {
-        const isAvailable = userFeatures.some(
-          (userFeature) => featureItem.classList.contains(`popup__feature--${userFeature}`),
-        );
+    fillPictures(accomodationElement, '.popup__photos', '.popup__photo', offer.photos);
+    removeSpareFeatures(accomodationElement, '.popup__features', '.popup__feature', offer.features);
 
-        if (!isAvailable) {
-          featureItem.remove();
-        }
-      });
-    }
-
-    if (accomodationIndex !== 0) { accomodationElement.classList.add('visually-hidden'); }
+    if (accomodationIndex !== 0) { accomodationElement.classList.add('hidden'); }
     accomodationCardFragment.appendChild(accomodationElement);
   });
 
