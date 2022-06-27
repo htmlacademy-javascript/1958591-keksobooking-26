@@ -14,22 +14,26 @@ const AccommodationType = {
  * @returns {String} - искомая строка
  */
 const getNounCase = (numeral, nounCases) => {
-  const twoDigitNumber = numeral.toString().substring(numeral.toString().length - 2);
-  const oneDigitNumber = numeral.toString().substring(numeral.toString().length - 1);
-  if ((twoDigitNumber > 10) && (twoDigitNumber < 15)) {
-    return `${numeral} ${nounCases[2]}`;
-  }
-  switch (oneDigitNumber) {
-    case '1':
-      return `${numeral} ${nounCases[0]}`;
-    case '2':
-      return `${numeral} ${nounCases[1]}`;
-    case '3':
-      return `${numeral} ${nounCases[1]}`;
-    case '4':
-      return `${numeral} ${nounCases[1]}`;
-    default:
+  if (numeral !== undefined) {
+    const twoDigitNumber = numeral.toString().substring(numeral.toString().length - 2);
+    const oneDigitNumber = numeral.toString().substring(numeral.toString().length - 1);
+    if ((twoDigitNumber > 10) && (twoDigitNumber < 15)) {
       return `${numeral} ${nounCases[2]}`;
+    }
+    switch (oneDigitNumber) {
+      case '1':
+        return `${numeral} ${nounCases[0]}`;
+      case '2':
+        return `${numeral} ${nounCases[1]}`;
+      case '3':
+        return `${numeral} ${nounCases[1]}`;
+      case '4':
+        return `${numeral} ${nounCases[1]}`;
+      default:
+        return `${numeral} ${nounCases[2]}`;
+    }
+  } else {
+    return `неизвестное количество ${nounCases[2]}`;
   }
 };
 
@@ -42,13 +46,18 @@ const getNounCase = (numeral, nounCases) => {
  * @param {Array} childContent - строка с адресом картинки или текстовая строка для свойства textContent
  */
 const fillContent = (elementParent, сhildSelector, childProperty, childFields, childContent) => {
+  let checkFields = true;
   childFields.forEach((childField) => {
     if (childField === undefined) {
-      elementParent.querySelector(сhildSelector).classList.add('hidden');
-      return false;
+      //elementParent.querySelector(сhildSelector).classList.add('hidden');
+      checkFields = false;
     }
   });
-  elementParent.querySelector(сhildSelector)[childProperty] = childContent;
+  if (checkFields === false) {
+    elementParent.querySelector(сhildSelector).remove();
+  } else {
+    elementParent.querySelector(сhildSelector)[childProperty] = childContent;
+  }
 };
 
 /**
@@ -63,21 +72,21 @@ const fillContent = (elementParent, сhildSelector, childProperty, childFields, 
 const fillPictures = (element, selectorContainer, selectorPicture, pictures) => {
 
   if (pictures === undefined) {
-    element.querySelector(selectorContainer).classList.add('hidden');
-    return false;
+    element.querySelector(selectorContainer).remove();
+  } else {
+    pictures.forEach((picture, index) => {
+      const photoList = element.querySelector(selectorContainer);
+      const photoItem = photoList.querySelector(selectorPicture);
+      if (index === 0) {
+        photoItem.src = picture;
+      }
+      else {
+        const photoItemAdditional = photoItem.cloneNode(true);
+        photoItemAdditional.src = picture;
+        photoList.append(photoItemAdditional);
+      }
+    });
   }
-  pictures.forEach((picture, index) => {
-    const photoList = element.querySelector(selectorContainer);
-    const photoItem = photoList.querySelector(selectorPicture);
-    if (index === 0) {
-      photoItem.src = picture;
-    }
-    else {
-      const photoItemAdditional = photoItem.cloneNode(true);
-      photoItemAdditional.src = picture;
-      photoList.append(photoItemAdditional);
-    }
-  });
 };
 
 /**
@@ -89,24 +98,22 @@ const fillPictures = (element, selectorContainer, selectorPicture, pictures) => 
  * @param {Array} itemNames - массив имен элементов
  */
 const removeSpareItems = (element, selectorContainer, selectorItem, itemNames) => {
-
   if (itemNames === undefined) {
-    element.querySelector(selectorContainer).classList.add('hidden');
-    return false;
+    element.querySelector(selectorContainer).remove();
+  } else {
+    const Container = element.querySelector(selectorContainer);
+    const list = Container.querySelectorAll(selectorItem);
+
+    list.forEach((Item) => {
+      const isAvailable = itemNames.some(
+        (itemName) => Item.classList.contains(`${selectorItem.substring(1)}--${itemName}`),
+      );
+
+      if (!isAvailable) {
+        Item.remove();
+      }
+    });
   }
-
-  const Container = element.querySelector(selectorContainer);
-  const list = Container.querySelectorAll(selectorItem);
-
-  list.forEach((Item) => {
-    const isAvailable = itemNames.some(
-      (itemName) => Item.classList.contains(`${selectorItem.substring(1)}--${itemName}`),
-    );
-
-    if (!isAvailable) {
-      Item.remove();
-    }
-  });
 };
 
 /**
@@ -156,7 +163,7 @@ const createAccomodationCards = (accomodationCards) => {
     fillContent(accomodationElement, '.popup__title', 'textContent', [offer.title], offer.title);
     fillContent(accomodationElement, '.popup__text--address', 'textContent', [offer.address], offer.address);
     fillContent(accomodationElement, '.popup__text--price', 'textContent', [offer.price], getPrice(offer.price));
-    fillContent(accomodationElement, '.popup__text--capacity', 'textContent', [offer.rooms, offer.guests], getCapacity(offer.rooms, offer.guests));
+    fillContent(accomodationElement, '.popup__text--capacity', 'textContent', [], getCapacity(offer.rooms, offer.guests));
     fillContent(accomodationElement, '.popup__text--time', 'textContent', [offer.checkin, offer.checkout], getTime(offer.checkin, offer.checkout));
     fillContent(accomodationElement, '.popup__description', 'textContent', [offer.description], offer.description);
     fillContent(accomodationElement, '.popup__avatar', 'src', [author.avatar], author.avatar);
