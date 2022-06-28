@@ -1,147 +1,178 @@
-import { createAccomodations } from './mocks/data.js';
+const AccommodationType = {
+  BUNGALOW: 'Бунгало',
+  FLAT: 'Квартира',
+  HOTEL: 'Отель',
+  HOUSE: 'Дом',
+  PALACE: 'Дворец'
+};
 
 /**
- * Возвращает строку - подпись для типа жилья
- * @param {String} accommodationType - тип жилья
+ * Возвращает строку, содержащую переданное числительное + существительное в
+ * правильной форме
+ * @param {String} numeral - числительное
+ * @param {Massive} nounCases - массив строк из трех значений - существительное в именительном падеже, родительном падеже, во множественном числе
  * @returns {String} - искомая строка
  */
-const getAccommodationType = (accommodationType) => {
-  switch (accommodationType) {
-    case 'bungalow':
-      return 'Бунгало';
-    case 'flat':
-      return 'Квартира';
-    case 'hotel':
-      return 'Отель';
-    case 'house':
-      return 'Дом';
-    case 'palace':
-      return 'Дворец';
-    default:
-      return 'Отель';
+const getNounCase = (numeral, nounCases) => {
+  if (numeral !== undefined) {
+    const twoDigitNumber = numeral.toString().substring(numeral.toString().length - 2);
+    const oneDigitNumber = numeral.toString().substring(numeral.toString().length - 1);
+    if ((twoDigitNumber > 10) && (twoDigitNumber < 15)) {
+      return `${numeral} ${nounCases[2]}`;
+    }
+    switch (oneDigitNumber) {
+      case '1':
+        return `${numeral} ${nounCases[0]}`;
+      case '2':
+        return `${numeral} ${nounCases[1]}`;
+      case '3':
+        return `${numeral} ${nounCases[1]}`;
+      case '4':
+        return `${numeral} ${nounCases[1]}`;
+      default:
+        return `${numeral} ${nounCases[2]}`;
+    }
+  } else {
+    return `неизвестное количество ${nounCases[2]}`;
   }
 };
 
 /**
- * Возвращает строку - слово "комната" в правильном падеже (в зависимости от количества комнат)
- * @param {String} rooms - количество комнат
+ * Заполняет указанное свойство переданного элемента *
+ * @param {Object} elementParent - текущий DOM-элемент (родитель)
+ * @param {String} сhildSelector - селектор элемента (ребенка), куда помещаются данные
+ * @param {String} childProperty - заполняемое свойство ('src' или 'textContent')
+ * @param {Array} childFields - поля объекта с данными для проверки (определены эти поля с данными или нет)
+ * @param {Array} childContent - строка с адресом картинки или текстовая строка для свойства textContent
+ */
+const fillContent = (elementParent, сhildSelector, childProperty, childFields, childContent) => {
+  let checkFields = true;
+  childFields.forEach((childField) => {
+    if (childField === undefined) {
+      //elementParent.querySelector(сhildSelector).classList.add('hidden');
+      checkFields = false;
+    }
+  });
+  if (checkFields === false) {
+    elementParent.querySelector(сhildSelector).remove();
+  } else {
+    elementParent.querySelector(сhildSelector)[childProperty] = childContent;
+  }
+};
+
+/**
+ * Помещает картинки из переданного массива (если он определен) в шаблон с данными,
+ * создает в шаблоне дополнительную разметку для картинок, если их больше, чем одна.
+ * Если картинок нет, скрывает контейнер картинок
+ * @param {Object} element - текущий DOM-элемент
+ * @param {String} selectorContainer - селектор контейнера картинок
+ * @param {String} selectorPicture - селектор картинки
+ * @param {Array} pictures - массив картинок
+ */
+const fillPictures = (element, selectorContainer, selectorPicture, pictures) => {
+
+  if (pictures === undefined) {
+    element.querySelector(selectorContainer).remove();
+  } else {
+    pictures.forEach((picture, index) => {
+      const photoList = element.querySelector(selectorContainer);
+      const photoItem = photoList.querySelector(selectorPicture);
+      if (index === 0) {
+        photoItem.src = picture;
+      }
+      else {
+        const photoItemAdditional = photoItem.cloneNode(true);
+        photoItemAdditional.src = picture;
+        photoList.append(photoItemAdditional);
+      }
+    });
+  }
+};
+
+/**
+ * Удаляет лишние элементы из контейнера - оставляет только те элементы, имена которых есть в переданном массиве
+ * Если переданный массив неопределен, скрывает контейнер
+ * @param {Object} element - текущий DOM-элемент
+ * @param {String} selectorContainer - селектор контейнера
+ * @param {String} selectorItem - селектор элемента
+ * @param {Array} itemNames - массив имен элементов
+ */
+const removeSpareItems = (element, selectorContainer, selectorItem, itemNames) => {
+  if (itemNames === undefined) {
+    element.querySelector(selectorContainer).remove();
+  } else {
+    const Container = element.querySelector(selectorContainer);
+    const list = Container.querySelectorAll(selectorItem);
+
+    list.forEach((Item) => {
+      const isAvailable = itemNames.some(
+        (itemName) => Item.classList.contains(`${selectorItem.substring(1)}--${itemName}`),
+      );
+
+      if (!isAvailable) {
+        Item.remove();
+      }
+    });
+  }
+};
+
+/**
+ * Возвращает строку для заполнения элемента шаблона '.popup__text--price'
+ * @param {String} price - прайс
  * @returns {String} - искомая строка
  */
-const getRoomCase = (rooms) => {
-  switch (rooms) {
-    case 1:
-      return 'комната';
-    case 2:
-      return 'комнаты';
-    case 3:
-      return 'комнаты';
-    case 4:
-      return 'комнаты';
-    default:
-      return 'комнат';
-  }
-};
+const getPrice = (price) => `${price}  ₽/ночь`;
 
 /**
- * Возвращает строку - слово "гость" в правильном падеже (в зависимости от количества гостей)
- * @param {String} guests - количество гостей
+ * Возвращает строку для заполнения элемента шаблона '.popup__text--сapacity'
+ * @param {String} rooms - число комнат
+ * @param {String} guests - число гостей
  * @returns {String} - искомая строка
  */
-const getGuestCase = (guests) => {
-  switch (guests) {
-    case 1:
-      return 'гостя';
-    default:
-      return 'гостей';
-  }
-};
+const getCapacity = (rooms, guests) => `${getNounCase(rooms, ['комната', 'комнаты', 'комнат'])} для ${getNounCase(guests, ['гостя', 'гостей', 'гостей'])}`;
 
 /**
- * Возвращает false, если если в объекте есть нужное свойство; если свойство неопределено,
- * скрывает соответствующий свойству блок в переданном DOM-элементе и возвращает true.
- * @param {String} element - текущий DOM-элемент
- * @param {String} selector - блок
- * @param {String} key - свойство объекта
- * @returns {boolean}
+ * Возвращает строку для заполнения элемента шаблона '.popup__text--time'
+ * @param {String} checkin - время заезда
+ * @param {String} checkout - время выезда
+ * @returns {String} - искомая строка
  */
-const hideBlock = (element, selector, key) => {
-  if (key === undefined) {
-    element.querySelector(selector).classList.add('visually-hidden');
-    return true;
-  }
-  return false;
-};
+const getTime = (checkin, checkout) => `Заезд после ${checkin}, выезд до ${checkout}`;
 
 /**
- *Создает необходимое количество DOM-элементов и заполняет их данными
- * @param {Number} cardAmount - необходимое число DOM-элементов
+ * Возвращает строку для заполнения элемента шаблона '.popup__type'
+ * @param {String} type - тип жилья
+ * @returns {String} - искомая строка
  */
-const createAccomodationCards = (cardAmount) => {
+const getType = (type) => AccommodationType[type.toUpperCase()];
+/**
+ *Создает необходимое количество DOM-элементов и заполняет их данными заранее подготовленного массива объектов
+ * @param {Array} accomodationCards - массив объектов с данными для заполнения DOM-элементов
+ */
+const createAccomodationCards = (accomodationCards) => {
   const placeForCards = document.querySelector('#map-canvas');
   const cardTemplate = document.querySelector('#card')
     .content
     .querySelector('.popup');
 
-  const accomodationCards = createAccomodations(cardAmount);
   const accomodationCardFragment = document.createDocumentFragment();
 
   accomodationCards.forEach(({ offer, author }, accomodationIndex) => {
     const accomodationElement = cardTemplate.cloneNode(true);
-    if (!hideBlock(accomodationElement, '.popup__title', offer.title)) {
-      accomodationElement.querySelector('.popup__title').textContent = offer.title;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--address', offer.address)) {
-      accomodationElement.querySelector('.popup__text--address').textContent = offer.address;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--price', offer.price)) {
-      accomodationElement.querySelector('.popup__text--price').textContent = `${offer.price}  ₽/ночь`;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--capacity', offer.rooms) || !hideBlock(accomodationElement, '.popup__text--capacity', offer.guests)) {
-      accomodationElement.querySelector('.popup__text--capacity').textContent = `${offer.rooms} ${getRoomCase(offer.rooms)} для ${offer.guests} ${getGuestCase(offer.guests)}`;
-    }
-    if (!hideBlock(accomodationElement, '.popup__text--time', offer.checkin) || !hideBlock(accomodationElement, '.popup__text--time', offer.checkout)) {
-      accomodationElement.querySelector('.popup__text--time').textContent = `Заезд после ${offer.checkin}, выезд до ${offer.checkout}`;
-    }
-    if (!hideBlock(accomodationElement, '.popup__description', offer.description)) {
-      accomodationElement.querySelector('.popup__description').textContent = offer.description;
-    }
 
-    accomodationElement.querySelector('.popup__avatar').src = author.avatar;
+    fillContent(accomodationElement, '.popup__title', 'textContent', [offer.title], offer.title);
+    fillContent(accomodationElement, '.popup__text--address', 'textContent', [offer.address], offer.address);
+    fillContent(accomodationElement, '.popup__text--price', 'textContent', [offer.price], getPrice(offer.price));
+    fillContent(accomodationElement, '.popup__text--capacity', 'textContent', [], getCapacity(offer.rooms, offer.guests));
+    fillContent(accomodationElement, '.popup__text--time', 'textContent', [offer.checkin, offer.checkout], getTime(offer.checkin, offer.checkout));
+    fillContent(accomodationElement, '.popup__description', 'textContent', [offer.description], offer.description);
+    fillContent(accomodationElement, '.popup__avatar', 'src', [author.avatar], author.avatar);
+    fillContent(accomodationElement, '.popup__type', 'textContent', [offer.type], getType(offer.type));
 
-    accomodationElement.querySelector('.popup__type').textContent = getAccommodationType(offer.type);
+    fillPictures(accomodationElement, '.popup__photos', '.popup__photo', offer.photos);
+    removeSpareItems(accomodationElement, '.popup__features', '.popup__feature', offer.features);
 
-    if (!hideBlock(accomodationElement, '.popup__photos', offer.photos)) {
-      offer.photos.forEach((photos, index) => {
-        const photoList = accomodationElement.querySelector('.popup__photos');
-        const photoItem = accomodationElement.querySelector('.popup__photo');
-        if (index === 0) {
-          photoItem.src = photos;
-        }
-        else {
-          const photoItemAdditional = photoItem.cloneNode(true);
-          photoItemAdditional.src = photos;
-          photoList.append(photoItemAdditional);
-        }
-      });
-    }
-
-    if (!hideBlock(accomodationElement, '.popup__features', offer.features)) {
-      const userFeatures = offer.features;
-      const featureContainer = accomodationElement.querySelector('.popup__features');
-      const featureList = featureContainer.querySelectorAll('.popup__feature');
-
-      featureList.forEach((featureItem) => {
-        const isAvailable = userFeatures.some(
-          (userFeature) => featureItem.classList.contains(`popup__feature--${userFeature}`),
-        );
-
-        if (!isAvailable) {
-          featureItem.remove();
-        }
-      });
-    }
-
-    if (accomodationIndex !== 0) { accomodationElement.classList.add('visually-hidden'); }
+    if (accomodationIndex !== 0) { accomodationElement.classList.add('hidden'); }
     accomodationCardFragment.appendChild(accomodationElement);
   });
 
@@ -149,3 +180,4 @@ const createAccomodationCards = (cardAmount) => {
 };
 
 export { createAccomodationCards };
+

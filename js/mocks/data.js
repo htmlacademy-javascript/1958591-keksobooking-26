@@ -54,35 +54,54 @@ const PHOTOS = [
   'https://assets.htmlacademy.ru/content/intensive/javascript-1/keksobooking/claire-rendall-b6kAwr1i0Iw.jpg',
 ];
 
+const Location = {
+  LAT_MIN: 35.65000,
+  LAT_MAX: 35.70000,
+  LNG_MIN: 139.70000,
+  LNG_MAX: 139.80000,
+  DIGIT: 5
+};
+
+const MIN_PRICE = 0;
+const MAX_PRICE = 10000;
+
+const MIN_GUESTS = 1;
+const MAX_GUESTS = 3;
+
+const MIN_ROOMS = 1;
+const MAX_ROOMS = 5;
+
+
 /**
  *Возвращает объект accomodation.
  * @returns {Object} - искомый объект
  */
 const getAccomodation = () => {
   const accomodationNumber = generateAccomodationNumber();
-  const randomLat = getRandomFloat(35.65000, 35.70000, 5);
-  const randomLng = getRandomFloat(139.70000, 139.80000, 5);
+
+  const location = {
+    lat: getRandomFloat(Location.LAT_MIN, Location.LAT_MAX, Location.DIGIT),
+    lng: getRandomFloat(Location.LNG_MIN, Location.LNG_MAX, Location.DIGIT)
+  };
+
   return {
     author: {
       avatar: `img/avatars/user${(accomodationNumber < 10) ? `0${accomodationNumber}` : accomodationNumber}.png`,
     },
     offer: {
       title: getRandomArrayElement(TITLES),
-      address: `${randomLat} ${randomLng}`,
-      price: getRandomInteger(100, 10000),
+      address: `${location.lat} ${location.lng}`,
+      price: getRandomInteger(MIN_PRICE, MAX_PRICE),
       type: getRandomArrayElement(ACCOMODATION_TYPES),
-      rooms: getRandomInteger(1, 10),
-      guests: getRandomInteger(1, 10),
+      rooms: getRandomInteger(MIN_ROOMS, MAX_ROOMS),
+      guests: getRandomInteger(MIN_GUESTS, MAX_GUESTS),
       checkin: getRandomArrayElement(CHECKINS),
       checkout: getRandomArrayElement(CHECKOUTS),
       features: getRandomElements(FEATURS),
       description: getRandomArrayElement(DESCRIPTIONS),
       photos: getRandomElements(PHOTOS),
     },
-    location: {
-      lat: randomLat,
-      lng: randomLng,
-    },
+    location
   };
 };
 
