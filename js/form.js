@@ -1,18 +1,18 @@
+import { getNounCase } from './cards.js';
+
 const SELECTORS = [
   'ad-form',
   'map__filters',
 ];
 
-const MIN_TITLE_LENGTH = 30;
-const MAX_TITLE_LENGTH = 100;
 const MAX_ROOMS = 100;
 const MAX_PRICE = 100000;
 
 const Capacity = {
-  '1': ['1'],
-  '2': ['1', '2'],
-  '3': ['1', '2', '3'],
-  '100': ['0']
+  1: ['1'],
+  2: ['1', '2'],
+  3: ['1', '2', '3'],
+  100: ['0']
 };
 
 const MinPrice = {
@@ -57,22 +57,6 @@ const pristine = new Pristine(form, {
   errorTextClass: 'ad-form__error'
 });
 
-//Валидация заголовка
-const titleField = form.querySelector('#title');
-/**
- * Проверяет значение поле title - обязательное, от 30 до 100 символов
- * @param {String}  value - значение поля
- * @returns {boolean} - возвращает true, если поле заполнено правильно
- */
-const validateTitle = (value) => value.length >= MIN_TITLE_LENGTH && value.length <= MAX_TITLE_LENGTH;
-
-/**
- * Возвращает текст сообщения об ошибке, если поле title заполнено неверно
- */
-const getTitleErrorMessage = () => `Заголовок объявления должен содержать от ${MIN_TITLE_LENGTH} до ${MAX_TITLE_LENGTH} символов`;
-
-pristine.addValidator(titleField, validateTitle, getTitleErrorMessage);
-
 //Валидация комнаты - гости
 const roomField = form.querySelector('#room_number');
 const guestField = form.querySelector('#capacity');
@@ -82,11 +66,18 @@ const guestField = form.querySelector('#capacity');
  * @returns {boolean} - возвращает true, если поля заполнены правильно
  */
 const validateGuest = () => Capacity[roomField.value].includes(guestField.value);
+
 /**
  * Возвращает текст сообщения об ошибке, если поля room_number и capacity заполнены неверно
  */
-const getGuestErrorMessage = () => `${(roomField.value < MAX_ROOMS) && (guestField.value !== '0') ? 'Число гостей не может быть больше числа комнат.' : '100 комнат не для гостей!'}`;
+const getGuestErrorMessage = () => `${(roomField.value < MAX_ROOMS) && (guestField.value !== '0') ? `По нашим условиям в ${getNounCase(roomField.value, ['комнате', 'комнатах', 'комнатах'])} размещается не более ${getNounCase(roomField.value, ['гостя', 'гостей', 'гостей'])}` : '100 комнат не для гостей!'}`;
 pristine.addValidator(guestField, validateGuest, getGuestErrorMessage);
+
+const onRoomChange = () => {
+  pristine.validate(guestField);
+};
+
+roomField.addEventListener('change', onRoomChange);
 
 //Валидация тип - цена
 const priceField = form.querySelector('#price');
@@ -100,7 +91,8 @@ const validatePrice = () => priceField.value >= MinPrice[typeField.value] && pri
 /**
  * Возвращает текст сообщения об ошибке, если поле price заполнено неверно
  */
-const getPriceErrorMessage = () => `${priceField.value <= MAX_PRICE ? `Цена за ночь должна быть не меньше ${MinPrice[typeField.value]} руб.` : `Цена за ночь должна быть меньше ${MAX_PRICE} руб.`}`;
+//const getPriceErrorMessage = () => `${priceField.value <= MAX_PRICE ? `Цена за ночь должна быть не меньше ${MinPrice[typeField.value]} руб.` : `Цена за ночь должна быть меньше ${MAX_PRICE} руб.`}`;
+const getPriceErrorMessage = () => `${priceField.value <= MAX_PRICE ? `Цена за ночь должна быть не меньше ${MinPrice[typeField.value]} руб.` : ''}`;
 pristine.addValidator(priceField, validatePrice, getPriceErrorMessage);
 
 /**
@@ -108,7 +100,7 @@ pristine.addValidator(priceField, validatePrice, getPriceErrorMessage);
  */
 const onTypeChange = () => {
   priceField.placeholder = MinPrice[typeField.value];
-  //pristine.validate(priceField);
+  pristine.validate(priceField);
 };
 
 typeField.addEventListener('change', onTypeChange);
@@ -132,7 +124,9 @@ timeFields.forEach((field) => pristine.addValidator(field, validateTime, getTime
 
 form.addEventListener('submit', (evt) => {
   evt.preventDefault();
-  pristine.validate();
+  if (pristine.validate()) {
+    form.submit();
+  }
 });
 
 export { toggleStatus };

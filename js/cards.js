@@ -173,5 +173,5 @@ const createAccomodationCard = ({ offer, author }) => {
   placeForCards.appendChild(accomodationCardFragment);
 };
 
-export { createAccomodationCard };
+export { createAccomodationCard, getNounCase };
 

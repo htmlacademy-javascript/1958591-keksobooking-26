@@ -7,4 +7,9 @@ const accomodations = createAccomodations(ACCOMODATION_COUNT);
 
 createAccomodationCard(accomodations[0]);
 toggleStatus(true);
+// const form = document.querySelector('ad-form');
+// const titleField = form.querySelector('#title');
+//form.setAttribute('novalidate', 'novalidate');
+//titleField.setCustomValidity(' ffff fffff');
+
 
