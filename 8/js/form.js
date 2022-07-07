@@ -94,7 +94,8 @@ const toggleStatus = (status) => {
  */
 const setValidators = () => {
   const form = document.querySelector(`.${SELECTORS[0]}`);
-  const timeFields = form.querySelectorAll('.ad-form__element--time select');
+  const timeInField = form.querySelector('#timein');
+  const timeOutField = form.querySelector('#timeout');
   const roomField = form.querySelector('#room_number');
   const guestField = form.querySelector('#capacity');
   const priceField = form.querySelector('#price');
@@ -123,10 +124,12 @@ const setValidators = () => {
 
   pristine.addValidator(guestField, validateGuest, getGuestErrorMessage);
 
+  /**
+   * Вызывает валидацию поля Число гостей при изменения поля Число комнат.
+   */
   const onRoomChange = () => {
     pristine.validate(guestField);
   };
-
   roomField.addEventListener('change', onRoomChange);
 
   /**
@@ -139,10 +142,12 @@ const setValidators = () => {
   /**
    * Возвращает текст сообщения об ошибке, если поле price заполнено неверно
    */
-
   const getPriceErrorMessage = () => `${priceField.value <= MAX_PRICE ? `Цена за ночь должна быть не меньше ${MinPrice[typeField.value]} руб.` : ''}`;
   pristine.addValidator(priceField, validatePrice, getPriceErrorMessage);
 
+  /**
+   * Устанавливает значение слайдера, если изменяется значение в поле цена
+   */
   const onPriceChange = () => {
     sliderElement.noUiSlider.set(priceField.value);
   };
@@ -169,17 +174,26 @@ const setValidators = () => {
   typeField.addEventListener('change', onTypeChange);
 
   /**
-   * Проверяет синхронизацию полей timein и timeout (значения должны быть равны)
+   * Проверяет синхронизацию полей timein и timeout (время заезда - выезда должно быть равно)
    * @returns {boolean} - возвращает true, если поля заполнены правильно
    */
-  const validateTime = () => timeFields[0].value === timeFields[1].value;
+  //const validateTime = () => timeInField.value === timeOutField.value;
 
   /**
-   * Возвращает текст сообщения об ошибке, если поля timein и timeout заполнены неверно
+   * Синхронизирует время выезда
    */
-  const getTimeErrorMessage = () => 'Выберите одинаковое время заезда и выезда';
+  const onTimeInChange = () => {
+    timeOutField.value = timeInField.value;
+  };
+  timeInField.addEventListener('change', onTimeInChange);
 
-  timeFields.forEach((field) => pristine.addValidator(field, validateTime, getTimeErrorMessage));
+  /**
+   * Синхронизирует время въезда
+   */
+  const onTimeOutChange = () => {
+    timeInField.value = timeOutField.value;
+  };
+  timeOutField.addEventListener('change', onTimeOutChange);
 
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
