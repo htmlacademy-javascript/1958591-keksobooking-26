@@ -145,17 +145,15 @@ const getTime = (checkin, checkout) => `Заезд после ${checkin}, вые
  * @returns {String} - искомая строка
  */
 const getType = (type) => AccommodationType[type.toUpperCase()];
+
 /**
  *Создает необходимое количество DOM-элементов и заполняет их данными заранее подготовленного массива объектов
  * @param {Array} accomodationCards - массив объектов с данными для заполнения DOM-элементов
  */
-const createAccomodationCard = ({ offer, author }) => {
-  const placeForCards = document.querySelector('#map-canvas');
+const createAccomodationPopup = ({ offer, author }) => {
   const cardTemplate = document.querySelector('#card')
     .content
     .querySelector('.popup');
-
-  const accomodationCardFragment = document.createDocumentFragment();
   const accomodationElement = cardTemplate.cloneNode(true);
   fillContent(accomodationElement, '.popup__title', 'textContent', [offer.title], offer.title);
   fillContent(accomodationElement, '.popup__text--address', 'textContent', [offer.address], offer.address);
@@ -169,9 +167,8 @@ const createAccomodationCard = ({ offer, author }) => {
   fillPictures(accomodationElement, '.popup__photos', '.popup__photo', offer.photos);
   removeSpareItems(accomodationElement, '.popup__features', '.popup__feature', offer.features);
 
-  accomodationCardFragment.appendChild(accomodationElement);
-  placeForCards.appendChild(accomodationCardFragment);
+  return accomodationElement;
 };
 
-export { createAccomodationCard, getNounCase };
+export { createAccomodationPopup, getNounCase };
 
