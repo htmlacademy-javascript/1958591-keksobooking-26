@@ -36,6 +36,9 @@ const pinIcon = L.icon({
   iconAnchor: [10, 20],
 });
 
+/**
+ * Устанавливает слайдер
+ */
 const setSlider = () => {
   const sliderElement = document.querySelector('.ad-form__slider');
   const priceInpute = document.querySelector('#price');
@@ -151,7 +154,6 @@ const setValidators = () => {
   const onTypeChange = () => {
     priceField.placeholder = MinPrice[typeField.value];
     priceField.setAttribute('min', MinPrice[typeField.value]);
-    pristine.validate(priceField);
     sliderElement.noUiSlider.updateOptions({
       range: {
         min: MinPrice[typeField.value],
@@ -160,6 +162,8 @@ const setValidators = () => {
       step: 500
     });
     sliderElement.noUiSlider.set(MinPrice[typeField.value]);
+    sliderElement.noUiSlider.set(priceField.value);
+    pristine.validate(priceField);
   };
 
   typeField.addEventListener('change', onTypeChange);
