@@ -1,10 +1,5 @@
-import { getNounCase } from './cards.js';
-import { createAccomodationPopup } from './cards.js';
-
-const SELECTORS = [
-  'ad-form',
-  'map__filters',
-];
+import { getNounCase, showAlert, createAccomodationPopup } from './cards.js';
+import { sendData } from './api.js';
 
 const MAX_ROOMS = 100;
 const MAX_PRICE = 100000;
@@ -36,6 +31,11 @@ const pinIcon = L.icon({
   iconAnchor: [10, 20],
 });
 
+const MAIN_LAT = 35.68941;
+const MAIN_LNG = 139.69235;
+const PRECISION = 5;
+const SCALE = 12;
+
 /**
  * Устанавливает слайдер
  */
@@ -66,34 +66,37 @@ const setSlider = () => {
  * переключает атрибут disable у их потомков, включает-выключает атрибут disable у слайдера.
  * @param {Boolean}  status - true для перевода в активный статус, false для перевода в неактивный
  */
-const toggleStatus = (status) => {
+const toggleStatus = (formSelector, status) => {
   const sliderElement = document.querySelector('.ad-form__slider');
-  SELECTORS.forEach((selector) => {
-    const toggleForm = document.querySelector(`.${selector}`);
-    if (status) {
-      toggleForm.classList.remove(`${selector}--disabled`);
-    } else {
-      toggleForm.classList.add(`${selector}--disabled`);
-    }
 
-    const elements = Array.from(toggleForm.children);
-    elements.forEach((element) => {
-      element.disabled = !status;
-    });
-  });
+  const toggleForm = document.querySelector(`.${formSelector}`);
   if (status) {
-    sliderElement.removeAttribute('disabled');
+    toggleForm.classList.remove(`${formSelector}--disabled`);
   } else {
-    sliderElement.setAttribute('disabled', true);
+    toggleForm.classList.add(`${formSelector}--disabled`);
   }
+
+  const elements = Array.from(toggleForm.children);
+  elements.forEach((element) => {
+    element.disabled = !status;
+  });
+
+  if (formSelector === 'ad-form') {
+    if (status) {
+      sliderElement.removeAttribute('disabled');
+    } else {
+      sliderElement.setAttribute('disabled', true);
+    }
+  }
+
 };
 
 
 /**
  * Устанавливает валидаторы на поля формы.
  */
-const setValidators = () => {
-  const form = document.querySelector(`.${SELECTORS[0]}`);
+const setValidators = (onSuccess) => {
+  const form = document.querySelector('.ad-form');
   const timeInField = form.querySelector('#timein');
   const timeOutField = form.querySelector('#timeout');
   const roomField = form.querySelector('#room_number');
@@ -195,13 +198,45 @@ const setValidators = () => {
   };
   timeOutField.addEventListener('change', onTimeOutChange);
 
+  /**
+    * Возвращает строку для заполнения поля адрес
+    * @param {Number}  latitude - широта
+    *
+    */
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
-    if (pristine.validate()) {
-      form.submit();
+    const isValid = pristine.validate();
+    if (isValid) {
+      sendData(
+        () => onSuccess(),
+        () => showAlert('Не удалось отправить форму. Попробуйте ещё раз'),
+        new FormData(evt.target),
+      );
+
+      // const formData = new FormData(evt.target);
+      // //form.submit();
+      // fetch(
+      //   'https://26.javascript.pages.academy/keksobooking',
+      //   {
+      //     method: 'POST',
+      //     body: formData,
+      //   },
+      // )
+      //   .then((response) => {
+      //     if (response.ok) {
+      //       //onSuccess();
+      //       alert('успех')
+      //     } else {
+      //       showAlert('Не удалось отправить форму. Попробуйте ещё раз');
+      //     }
+      //   })
+      //   .catch(() => {
+      //     showAlert('Не удалось отправить форму. Попробуйте ещё раз');
+      //   });
     }
   });
 };
+
 
 /**
  * Возвращает строку для заполнения поля адрес
@@ -212,22 +247,19 @@ const setValidators = () => {
 const getAddress = (latitude, longitude, precision) => `${latitude.toFixed(precision)}, ${longitude.toFixed(precision)}`;
 
 /**
-* Инициализирует карту, возвращает ссылку на карту
-* @param {Float}  mainLat - стартовая широта
-* @param {Float}  mainLng - стартовая долгота
-* @param {Float}  scale - масштаб карты
+* Инициализирует карту и главный маркер, отображает адрес в соответствующем поле. Возвращает ссылку на карту
 * @return {Object} map - ссылка на карту
 */
-const createMap = (mainLat, mainLng, scale) => {
+const createMap = () => {
   const map = L.map('map-canvas')
     .on('load', () => {
-      toggleStatus(true);
+      toggleStatus('ad-form', true);
     })
 
     .setView({
-      lat: mainLat,
-      lng: mainLng,
-    }, scale);
+      lat: MAIN_LAT,
+      lng: MAIN_LNG,
+    }, SCALE);
 
   L.tileLayer(
     'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
@@ -236,24 +268,12 @@ const createMap = (mainLat, mainLng, scale) => {
     },
   ).addTo(map);
 
-  return map;
-};
-
-/**
- * Создает главный маркер (перемещаемый), отображает адрес в соответствующем поле.
- * @param {param} map - ссылка на карту
- * @param {Number}  mainLat - широта
- * @param {Number}  mainLng - долгота
- * @param {Number}  precision - число знаков после запятой
- * @return {Object} mainMarker - созданный маркер
- */
-const createMainMarker = (map, mainLat, mainLng, precision) => {
   const addressField = document.querySelector('#address');
-  addressField.value = getAddress(mainLat, mainLng, precision);
+  addressField.value = getAddress(MAIN_LAT, MAIN_LNG, PRECISION);
   const mainMarker = L.marker(
     {
-      lat: mainLat,
-      lng: mainLng,
+      lat: MAIN_LAT,
+      lng: MAIN_LNG,
     },
     {
       draggable: true,
@@ -262,12 +282,11 @@ const createMainMarker = (map, mainLat, mainLng, precision) => {
   );
 
   mainMarker.addTo(map);
-
   mainMarker.on('moveend', (evt) => {
-    addressField.value = getAddress(evt.target.getLatLng().lat, evt.target.getLatLng().lng, precision);
+    addressField.value = getAddress(evt.target.getLatLng().lat, evt.target.getLatLng().lng, PRECISION);
   });
 
-  return mainMarker;
+  return map;
 };
 
 /**
@@ -311,5 +330,5 @@ const deleteMarkerGroup = (markerGroup) => {
   markerGroup.clearLayers();
 };
 
+export { toggleStatus, setSlider, setValidators, createMap, createMarkerGroup, deleteMarkerGroup };
 
-export { toggleStatus, setSlider, setValidators, createMap, createMainMarker, createMarkerGroup, deleteMarkerGroup };
