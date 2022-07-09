@@ -1,5 +1,6 @@
 import { getData } from './api.js';
-import { toggleStatus, setSlider, setValidators, createMap, createMarkerGroup, deleteMarkerGroup } from './form.js';
+import { createMap, createMarkerGroup, deleteMarkerGroup } from './map.js';
+import { toggleStatus, setSlider, setValidators } from './form.js';
 
 const ACCOMODATION_COUNT = 10;
 
