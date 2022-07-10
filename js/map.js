@@ -1,6 +1,6 @@
 import { createAccomodationPopup } from './cards.js';
 import { toggleStatus } from './form.js';
-import {  getAddress } from './util.js';
+import { getAddress, showAlert } from './util.js';
 
 
 const mainPinIcon = L.icon({
@@ -19,6 +19,7 @@ const MAIN_LAT = 35.68941;
 const MAIN_LNG = 139.69235;
 const PRECISION = 5;
 const SCALE = 12;
+let mainMarker;
 
 /**
 * Инициализирует карту и главный маркер, отображает адрес в соответствующем поле. Возвращает ссылку на карту
@@ -44,7 +45,7 @@ const createMap = () => {
 
   const addressField = document.querySelector('#address');
   addressField.value = getAddress(MAIN_LAT, MAIN_LNG, PRECISION);
-  const mainMarker = L.marker(
+  mainMarker = L.marker(
     {
       lat: MAIN_LAT,
       lng: MAIN_LNG,
@@ -100,8 +101,12 @@ const createMarkerGroup = (accomodations, map) => {
   return markerGroup;
 };
 
-const deleteMarkerGroup = (markerGroup) => {
-  markerGroup.clearLayers();
+// const deleteMarkerGroup = (markerGroup) => {
+//   markerGroup.clearLayers();
+// };
+
+const deleteMarkerGroup = () => {
+  showAlert('Привет');
 };
 
-export { createMap, createMarkerGroup, deleteMarkerGroup };
+export { createMap, createMarkerGroup, deleteMarkerGroup, mainMarker };

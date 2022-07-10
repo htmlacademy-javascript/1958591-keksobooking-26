@@ -1,5 +1,6 @@
-import { getNounCase, showAlert } from './util.js';
+import { getNounCase, createErrorMessage } from './util.js';
 import { sendData } from './api.js';
+import { mainMarker } from './map.js';
 
 const MAX_ROOMS = 100;
 const MAX_PRICE = 100000;
@@ -19,14 +20,33 @@ const MinPrice = {
   palace: 10000
 };
 
+const form = document.querySelector('.ad-form');
+const titleField = form.querySelector('#title');
+const timeInField = form.querySelector('#timein');
+const timeOutField = form.querySelector('#timeout');
+const roomField = form.querySelector('#room_number');
+const guestField = form.querySelector('#capacity');
+const priceField = form.querySelector('#price');
+const typeField = form.querySelector('#type');
+const sliderElement = form.querySelector('.ad-form__slider');
+const submitButton = form.querySelector('.ad-form__submit');
+const resetButton = form.querySelector('.ad-form__reset');
+const descriptionField = form.querySelector('#description');
+
+const pristine = new Pristine(form, {
+  classTo: 'ad-form__element',
+  errorClass: 'ad-form__item--invalid',
+  successClass: 'ad-form__item--valid',
+  errorTextParent: 'ad-form__element',
+  errorTextTag: 'span',
+  errorTextClass: 'ad-form__error'
+});
 
 
 /**
  * Устанавливает слайдер
  */
 const setSlider = () => {
-  const sliderElement = document.querySelector('.ad-form__slider');
-  const priceInpute = document.querySelector('#price');
   noUiSlider.create(sliderElement, {
     range: {
       min: 0,
@@ -42,7 +62,7 @@ const setSlider = () => {
   });
 
   sliderElement.noUiSlider.on('slide', () => {
-    priceInpute.value = sliderElement.noUiSlider.get();
+    priceField.value = sliderElement.noUiSlider.get();
   });
 };
 
@@ -52,8 +72,6 @@ const setSlider = () => {
  * @param {Boolean}  status - true для перевода в активный статус, false для перевода в неактивный
  */
 const toggleStatus = (formSelector, status) => {
-  const sliderElement = document.querySelector('.ad-form__slider');
-
   const toggleForm = document.querySelector(`.${formSelector}`);
   if (status) {
     toggleForm.classList.remove(`${formSelector}--disabled`);
@@ -73,45 +91,37 @@ const toggleStatus = (formSelector, status) => {
       sliderElement.setAttribute('disabled', true);
     }
   }
-
 };
 
+/**
+ * Проверяет синхронизацию комнат и мест (поля поля room_number и capacity), правило описано в объекте Capacity
+ * @returns {boolean} - возвращает true, если поля заполнены правильно
+ */
+const validateGuest = () => Capacity[roomField.value].includes(guestField.value);
+
+/**
+ * Возвращает текст сообщения об ошибке, если поля room_number и capacity заполнены неверно
+ */
+const getGuestErrorMessage = () => `${(roomField.value < MAX_ROOMS) && (guestField.value !== '0') ? `По нашим условиям в ${getNounCase(roomField.value, ['комнате', 'комнатах', 'комнатах'])} размещается не более ${getNounCase(roomField.value, ['гостя', 'гостей', 'гостей'])}` : '100 комнат не для гостей!'}`;
+
+/**
+ * Проверяет значение поля price - обязательное, в диапазоне от минимума до MAX_PRICE, где минимум
+ * определяется полем type (тип жилья), правило записано в объекте MinPrice
+ * @returns {boolean} - возвращает true, если поле заполнено правильно
+ */
+const validatePrice = () => priceField.value >= MinPrice[typeField.value] && priceField.value <= MAX_PRICE;
+
+/**
+ * Возвращает текст сообщения об ошибке, если поле price заполнено неверно
+ */
+const getPriceErrorMessage = () => `${priceField.value <= MAX_PRICE ? `Цена за ночь должна быть не меньше ${MinPrice[typeField.value]} руб.` : ''}`;
 
 /**
  * Устанавливает валидаторы на поля формы.
  */
-const setValidators = (onSuccess) => {
-  const form = document.querySelector('.ad-form');
-  const timeInField = form.querySelector('#timein');
-  const timeOutField = form.querySelector('#timeout');
-  const roomField = form.querySelector('#room_number');
-  const guestField = form.querySelector('#capacity');
-  const priceField = form.querySelector('#price');
-  const typeField = form.querySelector('#type');
-  const sliderElement = document.querySelector('.ad-form__slider');
-
-  const pristine = new Pristine(form, {
-    classTo: 'ad-form__element',
-    errorClass: 'ad-form__item--invalid',
-    successClass: 'ad-form__item--valid',
-    errorTextParent: 'ad-form__element',
-    errorTextTag: 'span',
-    errorTextClass: 'ad-form__error'
-  });
-
-  /**
-   * Проверяет синхронизацию комнат и мест (поля поля room_number и capacity), правило описано в объекте Capacity
-   * @returns {boolean} - возвращает true, если поля заполнены правильно
-   */
-  const validateGuest = () => Capacity[roomField.value].includes(guestField.value);
-
-  /**
-   * Возвращает текст сообщения об ошибке, если поля room_number и capacity заполнены неверно
-   */
-  const getGuestErrorMessage = () => `${(roomField.value < MAX_ROOMS) && (guestField.value !== '0') ? `По нашим условиям в ${getNounCase(roomField.value, ['комнате', 'комнатах', 'комнатах'])} размещается не более ${getNounCase(roomField.value, ['гостя', 'гостей', 'гостей'])}` : '100 комнат не для гостей!'}`;
+const setValidators = () => {
 
   pristine.addValidator(guestField, validateGuest, getGuestErrorMessage);
-
   /**
    * Вызывает валидацию поля Число гостей при изменения поля Число комнат.
    */
@@ -120,17 +130,6 @@ const setValidators = (onSuccess) => {
   };
   roomField.addEventListener('change', onRoomChange);
 
-  /**
-   * Проверяет значение поля price - обязательное, в диапазоне от минимума до MAX_PRICE, где минимум
-   * определяется полем type (тип жилья), правило записано в объекте MinPrice
-   * @returns {boolean} - возвращает true, если поле заполнено правильно
-   */
-  const validatePrice = () => priceField.value >= MinPrice[typeField.value] && priceField.value <= MAX_PRICE;
-
-  /**
-   * Возвращает текст сообщения об ошибке, если поле price заполнено неверно
-   */
-  const getPriceErrorMessage = () => `${priceField.value <= MAX_PRICE ? `Цена за ночь должна быть не меньше ${MinPrice[typeField.value]} руб.` : ''}`;
   pristine.addValidator(priceField, validatePrice, getPriceErrorMessage);
 
   /**
@@ -142,7 +141,7 @@ const setValidators = (onSuccess) => {
   priceField.addEventListener('input', onPriceChange);
 
   /**
-   * Меняет минимальное значение и плейсхолдер поля price при изменении значения в поле type
+   * Меняет минимальное значение и плейсхолдер поля price при изменении значения в поле type, переустанавливает слайдер
    */
   const onTypeChange = () => {
     priceField.placeholder = MinPrice[typeField.value];
@@ -162,12 +161,6 @@ const setValidators = (onSuccess) => {
   typeField.addEventListener('change', onTypeChange);
 
   /**
-   * Проверяет синхронизацию полей timein и timeout (время заезда - выезда должно быть равно)
-   * @returns {boolean} - возвращает true, если поля заполнены правильно
-   */
-  //const validateTime = () => timeInField.value === timeOutField.value;
-
-  /**
    * Синхронизирует время выезда
    */
   const onTimeInChange = () => {
@@ -182,45 +175,59 @@ const setValidators = (onSuccess) => {
     timeInField.value = timeOutField.value;
   };
   timeOutField.addEventListener('change', onTimeOutChange);
+};
 
-  // /**
-  //   * Возвращает строку для заполнения поля адрес
-  //   * @param {Number}  latitude - широта
-  //   *
-  //   */
+const blockSubmitButton = () => {
+
+  submitButton.disabled = true;
+  submitButton.textContent = 'Публикую...';
+};
+const unblockSubmitButton = () => {
+  submitButton.disabled = false;
+  submitButton.textContent = 'Опубликовать';
+};
+
+const setFormSubmit = (onSuccess) => {
   form.addEventListener('submit', (evt) => {
     evt.preventDefault();
     const isValid = pristine.validate();
     if (isValid) {
+      blockSubmitButton();
       sendData(
-        () => onSuccess(),
-        () => showAlert('Не удалось отправить форму. Попробуйте ещё раз'),
+        () => {
+          onSuccess();
+          //Здесь очистка формы
+          unblockSubmitButton();
+        },
+        () => {
+          createErrorMessage();
+          unblockSubmitButton();
+        },
         new FormData(evt.target),
       );
-
-      // const formData = new FormData(evt.target);
-      // //form.submit();
-      // fetch(
-      //   'https://26.javascript.pages.academy/keksobooking',
-      //   {
-      //     method: 'POST',
-      //     body: formData,
-      //   },
-      // )
-      //   .then((response) => {
-      //     if (response.ok) {
-      //       //onSuccess();
-      //       alert('успех')
-      //     } else {
-      //       showAlert('Не удалось отправить форму. Попробуйте ещё раз');
-      //     }
-      //   })
-      //   .catch(() => {
-      //     showAlert('Не удалось отправить форму. Попробуйте ещё раз');
-      //   });
     }
   });
 };
 
-export { toggleStatus, setSlider, setValidators};
+const ClearForm = () => {
+  mainMarker
+};
+
+
+const resetForm = (map) => {
+  form.reset();
+  if (marker !== null) {
+    map.removeLayer(marker);
+  }
+
+};
+
+const setFormReset = (map) => {
+  form.addEventListener('reset', (evt) => {
+    evt.preventDefault();
+    resetForm(map);
+  });
+};
+
+export { toggleStatus, setSlider, setValidators, setFormSubmit };
 

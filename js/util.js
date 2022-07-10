@@ -42,7 +42,6 @@ const showAlert = (message) => {
   alertContainer.style.fontSize = '30px';
   alertContainer.style.textAlign = 'center';
   alertContainer.style.backgroundColor = 'red';
-
   alertContainer.textContent = message;
 
   document.body.append(alertContainer);
@@ -58,6 +57,60 @@ const showAlert = (message) => {
  * @param {Number}  longitude - долгота
  * @param {Number}  precision - число знаков после запятой
  */
- const getAddress = (latitude, longitude, precision) => `${latitude.toFixed(precision)}, ${longitude.toFixed(precision)}`;
+const getAddress = (latitude, longitude, precision) => `${latitude.toFixed(precision)}, ${longitude.toFixed(precision)}`;
 
-export { getNounCase, showAlert, getAddress };
+const isEscapeKey = (evt) => evt.key === 'Escape';
+
+
+const onSuccessElementEscKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
+    removeSuccessElement();
+  }
+};
+
+const removeSuccessElement = () => {
+  const successElement = document.querySelector('.success');
+  successElement.remove();
+  document.removeEventListener('keydown', onSuccessElementEscKeydown);
+};
+
+const createSuccessMessage = () => {
+  const successMessageTemplate = document.querySelector('#success').content;
+  const successMessageElement = successMessageTemplate.cloneNode(true);
+  document.body.append(successMessageElement);
+  const successElement = document.querySelector('.success');
+  const onSuccessElementClick = () => {
+    successElement.remove();
+  };
+  successElement.addEventListener('click', onSuccessElementClick);
+  document.addEventListener('keydown', onSuccessElementEscKeydown);
+};
+
+const onErrorElementEscKeydown = (evt) => {
+  if (isEscapeKey(evt)) {
+    evt.preventDefault();
+    removeErrorElement();
+  }
+};
+const removeErrorElement = () => {
+  const errorElement = document.querySelector('.error');
+  errorElement.remove();
+  document.removeEventListener('keydown', onErrorElementEscKeydown);
+};
+
+const createErrorMessage = () => {
+  const errorMessageTemplate = document.querySelector('#error').content;
+  const errorMessageElement = errorMessageTemplate.cloneNode(true);
+  document.body.append(errorMessageElement);
+  const errorElement = document.querySelector('.error');
+  const errorButton = document.querySelector('.error__button');
+  const onErrorElement = () => {
+    errorElement.remove();
+  };
+  errorElement.addEventListener('click', onErrorElement);
+  errorButton.addEventListener('click', onErrorElement);
+  document.addEventListener('keydown', onErrorElementEscKeydown);
+};
+
+export { getNounCase, showAlert, getAddress, createSuccessMessage, createErrorMessage };
