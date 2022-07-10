@@ -92,13 +92,15 @@ const createMarker = (markerGroup, accomodation) => {
  * @param {Array}  accomodations - массив объектов с характеристиками предложения жилья
  * @return {Object} markerGroup - ссылка на слой с группой маркеров
  */
-const createMarkerGroup = (accomodations, map) => {
-  const markerGroup = L.layerGroup().addTo(map);
+const renderMarkerGroup = (accomodations, accomodationCount) => {
 
-  accomodations.forEach((accomodation) => {
+  const map = createMap();
+  const markerGroup = L.layerGroup().addTo(map);
+  const newones = accomodations.slice(0, accomodationCount);
+  newones.forEach((accomodation) => {
     createMarker(markerGroup, accomodation);
   });
-
+  toggleStatus('map__filters', true);
   return markerGroup;
 };
 
@@ -110,4 +112,4 @@ const deleteMarkerGroup = () => {
   showAlert('Привет');
 };
 
-export { createMap, createMarkerGroup, deleteMarkerGroup, mainMarker };
+export { createMap, renderMarkerGroup, deleteMarkerGroup, mainMarker };

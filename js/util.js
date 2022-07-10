@@ -69,11 +69,11 @@ const onSuccessElementEscKeydown = (evt) => {
   }
 };
 
-const removeSuccessElement = () => {
+function removeSuccessElement() {
   const successElement = document.querySelector('.success');
   successElement.remove();
   document.removeEventListener('keydown', onSuccessElementEscKeydown);
-};
+}
 
 const createSuccessMessage = () => {
   const successMessageTemplate = document.querySelector('#success').content;
@@ -93,11 +93,12 @@ const onErrorElementEscKeydown = (evt) => {
     removeErrorElement();
   }
 };
-const removeErrorElement = () => {
+
+function removeErrorElement() {
   const errorElement = document.querySelector('.error');
   errorElement.remove();
   document.removeEventListener('keydown', onErrorElementEscKeydown);
-};
+}
 
 const createErrorMessage = () => {
   const errorMessageTemplate = document.querySelector('#error').content;

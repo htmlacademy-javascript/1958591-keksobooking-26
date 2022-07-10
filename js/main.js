@@ -1,27 +1,19 @@
 import { getData } from './api.js';
 import { createSuccessMessage } from './util.js';
-import { createMap, createMarkerGroup, deleteMarkerGroup } from './map.js';
+import { renderMarkerGroup, deleteMarkerGroup } from './map.js';
 import { toggleStatus, setSlider, setValidators, setFormSubmit } from './form.js';
 
 const ACCOMODATION_COUNT = 10;
 
-const SELECTORS = [
-  'ad-form',
-  'map__filters',
-];
-
 setSlider();
-toggleStatus(SELECTORS[0], false);
-toggleStatus(SELECTORS[1], false);
+toggleStatus('ad-form', false);
+toggleStatus('map__filters', false);
 setValidators();
 
-setFormSubmit(createSuccessMessage);
-
-const map = createMap();
-
 getData((accomodations) => {
-  createMarkerGroup(accomodations.slice(0, ACCOMODATION_COUNT), map);
-  toggleStatus(SELECTORS[1], true);
+  renderMarkerGroup(accomodations, ACCOMODATION_COUNT);
 });
+
+setFormSubmit(createSuccessMessage);
 
 export { deleteMarkerGroup };

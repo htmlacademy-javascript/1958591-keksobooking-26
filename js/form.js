@@ -209,25 +209,5 @@ const setFormSubmit = (onSuccess) => {
   });
 };
 
-// const ClearForm = () => {
-//   mainMarker
-// };
-
-
-// const resetForm = (map) => {
-//   form.reset();
-//   if (marker !== null) {
-//     map.removeLayer(marker);
-//   }
-
-// };
-
-// const setFormReset = (map) => {
-//   form.addEventListener('reset', (evt) => {
-//     evt.preventDefault();
-//     resetForm(map);
-//   });
-// };
-
 export { toggleStatus, setSlider, setValidators, setFormSubmit };
 
