@@ -1,6 +1,6 @@
 import { getNounCase, createErrorMessage } from './util.js';
 import { sendData } from './api.js';
-import { mainMarker } from './map.js';
+//import { mainMarker } from './map.js';
 
 const MAX_ROOMS = 100;
 const MAX_PRICE = 100000;
@@ -21,7 +21,7 @@ const MinPrice = {
 };
 
 const form = document.querySelector('.ad-form');
-const titleField = form.querySelector('#title');
+//const titleField = form.querySelector('#title');
 const timeInField = form.querySelector('#timein');
 const timeOutField = form.querySelector('#timeout');
 const roomField = form.querySelector('#room_number');
@@ -30,8 +30,8 @@ const priceField = form.querySelector('#price');
 const typeField = form.querySelector('#type');
 const sliderElement = form.querySelector('.ad-form__slider');
 const submitButton = form.querySelector('.ad-form__submit');
-const resetButton = form.querySelector('.ad-form__reset');
-const descriptionField = form.querySelector('#description');
+//const resetButton = form.querySelector('.ad-form__reset');
+//const descriptionField = form.querySelector('#description');
 
 const pristine = new Pristine(form, {
   classTo: 'ad-form__element',
@@ -209,25 +209,25 @@ const setFormSubmit = (onSuccess) => {
   });
 };
 
-const ClearForm = () => {
-  mainMarker
-};
+// const ClearForm = () => {
+//   mainMarker
+// };
 
 
-const resetForm = (map) => {
-  form.reset();
-  if (marker !== null) {
-    map.removeLayer(marker);
-  }
+// const resetForm = (map) => {
+//   form.reset();
+//   if (marker !== null) {
+//     map.removeLayer(marker);
+//   }
 
-};
+// };
 
-const setFormReset = (map) => {
-  form.addEventListener('reset', (evt) => {
-    evt.preventDefault();
-    resetForm(map);
-  });
-};
+// const setFormReset = (map) => {
+//   form.addEventListener('reset', (evt) => {
+//     evt.preventDefault();
+//     resetForm(map);
+//   });
+// };
 
 export { toggleStatus, setSlider, setValidators, setFormSubmit };
 

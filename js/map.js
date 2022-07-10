@@ -19,6 +19,7 @@ const MAIN_LAT = 35.68941;
 const MAIN_LNG = 139.69235;
 const PRECISION = 5;
 const SCALE = 12;
+
 let mainMarker;
 
 /**
