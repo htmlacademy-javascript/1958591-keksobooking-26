@@ -1,3 +1,5 @@
+import { SetMarkers } from './map.js';
+
 const ALERT_SHOW_TIME = 5000;
 
 /**
@@ -59,6 +61,15 @@ const showAlert = (message) => {
  */
 const getAddress = (latitude, longitude, precision) => `${latitude.toFixed(precision)}, ${longitude.toFixed(precision)}`;
 
+const formReset = () => {
+  const form = document.querySelector('.ad-form');
+  const formFilters = document.querySelector('.map__filters');
+  form.reset();
+  formFilters.reset();
+  SetMarkers();
+};
+
+
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
 
@@ -71,6 +82,7 @@ const onSuccessElementEscKeydown = (evt) => {
 
 function removeSuccessElement() {
   const successElement = document.querySelector('.success');
+  formReset();
   successElement.remove();
   document.removeEventListener('keydown', onSuccessElementEscKeydown);
 }
@@ -81,7 +93,7 @@ const createSuccessMessage = () => {
   document.body.append(successMessageElement);
   const successElement = document.querySelector('.success');
   const onSuccessElementClick = () => {
-    successElement.remove();
+    removeSuccessElement();
   };
   successElement.addEventListener('click', onSuccessElementClick);
   document.addEventListener('keydown', onSuccessElementEscKeydown);
@@ -107,11 +119,12 @@ const createErrorMessage = () => {
   const errorElement = document.querySelector('.error');
   const errorButton = document.querySelector('.error__button');
   const onErrorElement = () => {
-    errorElement.remove();
+    removeErrorElement();
   };
   errorElement.addEventListener('click', onErrorElement);
   errorButton.addEventListener('click', onErrorElement);
   document.addEventListener('keydown', onErrorElementEscKeydown);
 };
+
 
 export { getNounCase, showAlert, getAddress, createSuccessMessage, createErrorMessage };

@@ -20,7 +20,6 @@ const fillContent = (elementParent, сhildSelector, childProperty, childFields, 
   let checkFields = true;
   childFields.forEach((childField) => {
     if (childField === undefined) {
-      //elementParent.querySelector(сhildSelector).classList.add('hidden');
       checkFields = false;
     }
   });

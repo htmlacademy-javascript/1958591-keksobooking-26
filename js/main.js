@@ -1,6 +1,6 @@
 import { getData } from './api.js';
 import { createSuccessMessage } from './util.js';
-import { renderMarkerGroup, deleteMarkerGroup } from './map.js';
+import { renderMarkerGroup } from './map.js';
 import { toggleStatus, setSlider, setValidators, setFormSubmit } from './form.js';
 
 const ACCOMODATION_COUNT = 10;
@@ -16,4 +16,3 @@ getData((accomodations) => {
 
 setFormSubmit(createSuccessMessage);
 
-export { deleteMarkerGroup };

@@ -1,6 +1,6 @@
 import { createAccomodationPopup } from './cards.js';
 import { toggleStatus } from './form.js';
-import { getAddress, showAlert } from './util.js';
+import { getAddress } from './util.js';
 
 
 const mainPinIcon = L.icon({
@@ -21,6 +21,97 @@ const PRECISION = 5;
 const SCALE = 12;
 
 let mainMarker;
+let markerGroup;
+//let map;
+
+
+const createFilterSample = () => {
+  const featuresFilters = document.querySelectorAll('.map__checkbox');
+  const checkedFeatures = [];
+  let maxRank = 0;
+  featuresFilters.forEach((featuresFilter) => {
+    if (featuresFilter.checked === true) {
+      checkedFeatures.push(featuresFilter.value);
+      maxRank = maxRank + 1;
+    }
+  });
+  const filterSample = {
+    rank: '',
+    typeFilter: '',
+    priceFilter: '',
+    roomsFilter: '',
+    guestFilter: '',
+    featuresFilters: checkedFeatures
+  };
+
+  if (document.querySelector('#housing-type').value !== 'any') {
+    filterSample.typeFilter = document.querySelector('#housing-type').value;
+    maxRank = maxRank + 1;
+  }
+
+  if (document.querySelector('#housing-price').value !== 'any') {
+    filterSample.priceFilter = document.querySelector('#housing-price').value;
+    maxRank = maxRank + 1;
+  }
+
+  if (document.querySelector('#housing-rooms').value !== 'any') {
+    filterSample.roomsFilter = document.querySelector('#housing-rooms').value;
+    maxRank = maxRank + 1;
+  }
+
+  if (document.querySelector('#housing-guests').value !== 'any') {
+    filterSample.guestFilter = document.querySelector('#housing-guests').value;
+    maxRank = maxRank + 1;
+  }
+
+  filterSample.rank = maxRank;
+  return filterSample;
+
+};
+
+const countRank = ({ offer }, filterSample) => {
+
+  let rank = 0;
+
+  if ((offer.type !== undefined) && (offer.type === filterSample.typeFilter)) {
+    rank += 1;
+  }
+  if ((offer.price !== undefined) && (filterSample.priceFilter === 'low') && (offer.price < 10000)) {
+    rank += 1;
+  }
+  if ((offer.price !== undefined) && (filterSample.priceFilter === 'high') && (offer.price > 50000)) {
+    rank += 1;
+  }
+  if ((offer.price !== undefined) && (filterSample.priceFilter === 'middle') && (offer.price >= 10000) && (offer.price <= 50000)) {
+    rank += 1;
+  }
+  if ((offer.rooms !== undefined) && (offer.rooms === +filterSample.roomsFilter) && (offer.rooms !== 0)) {
+    rank += 1;
+  }
+  if ((offer.guests !== undefined) && (offer.guests === +filterSample.guestFilter) && (offer.guests !== 0)) {
+    rank += 1;
+  }
+  // if (offer.features !== undefined) {
+  //   for (let i = 0; i < filterSample.featuresFilters.length; i++) {
+  //     for (let j = 0; j < offer.features.length; j++) {
+  //       if (filterSample.featuresFilters[i] === filterSample.featuresFilters[j]) {
+  //         rank += 1;
+  //       }
+  //     }
+  //   }
+  // }
+
+  if (offer.features !== undefined) {
+    filterSample.featuresFilters.forEach((filter) => {
+      offer.features.forEach((feature) => {
+        if (filter === feature) {
+          rank += 1;
+        }
+      });
+    });
+  }
+  return rank;
+};
 
 /**
 * Инициализирует карту и главный маркер, отображает адрес в соответствующем поле. Возвращает ссылку на карту
@@ -70,7 +161,7 @@ const createMap = () => {
  * @param {Object} markerGroup - ссылка на слой с объектами
  * @param {Object}  accomodation - объект с характеристиками предложения
  */
-const createMarker = (markerGroup, accomodation) => {
+const createMarker = (accomodation) => {
   const marker = L.marker(
     {
       lat: accomodation.location.lat,
@@ -93,23 +184,58 @@ const createMarker = (markerGroup, accomodation) => {
  * @return {Object} markerGroup - ссылка на слой с группой маркеров
  */
 const renderMarkerGroup = (accomodations, accomodationCount) => {
-
+  //newaAccomodations = accomodations;
   const map = createMap();
-  const markerGroup = L.layerGroup().addTo(map);
-  const newones = accomodations.slice(0, accomodationCount);
-  newones.forEach((accomodation) => {
-    createMarker(markerGroup, accomodation);
-  });
+  markerGroup = L.layerGroup().addTo(map);
+  accomodations
+    .slice(0, accomodationCount)
+    .forEach((accomodation) => {
+      createMarker(accomodation);
+    });
   toggleStatus('map__filters', true);
-  return markerGroup;
+  const mapFilters = document.querySelector('.map__filters');
+  mapFilters.addEventListener('change', () => {
+    markerGroup.clearLayers();
+    const newSample = createFilterSample();
+    //console.log(newSample);
+    accomodations
+      .slice()
+      .filter((accomodation) => countRank(accomodation, newSample) === newSample.rank)
+      .slice(0, accomodationCount)
+      .forEach((accomodation) => {
+        createMarker(accomodation);
+        //console.log(accomodation);
+        //console.log(countRank(accomodation, newSample));
+      });
+  });
 };
 
-// const deleteMarkerGroup = (markerGroup) => {
+
+// const filterMarkers = (accomodations, accomodationCount) => {
 //   markerGroup.clearLayers();
+//   markerGroup = L.layerGroup().addTo(map);
+//   //Здесь вызываем rank для каждого элемента массива и сортируем массив, или обрезаем - с зависимости от максимального rank
+//   const rankedAccomodations = accomodations.slice(0, accomodationCount);
+//   choosenAccomodations.forEach((accomodation) => {
+//     createMarker(accomodation);
+//   });
 // };
 
-const deleteMarkerGroup = () => {
-  showAlert('Привет');
+// function onMapFiltersChange() {
+//   const newSample = createFilterSample();
+//   const newacc1 = newaAccomodations
+//     .slice()
+//     .filter(((accomodation) => countRank(accomodation, newSample) === newSample.rank));
+
+//   //console.log(newacc1);
+// }
+
+const SetMarkers = () => {
+  const latlng = L.latLng(MAIN_LAT, MAIN_LNG);
+  mainMarker.setLatLng(latlng);
+  const addressField = document.querySelector('#address');
+  addressField.value = getAddress(MAIN_LAT, MAIN_LNG, PRECISION);
+  markerGroup.clearLayers();
 };
 
-export { createMap, renderMarkerGroup, deleteMarkerGroup, mainMarker };
+export { renderMarkerGroup, SetMarkers };
