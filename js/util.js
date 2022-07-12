@@ -1,4 +1,4 @@
-import { SetMarkers } from './map.js';
+//import { SetMarkers } from './map.js';
 
 const ALERT_SHOW_TIME = 5000;
 
@@ -65,8 +65,8 @@ const formReset = () => {
   const form = document.querySelector('.ad-form');
   const formFilters = document.querySelector('.map__filters');
   form.reset();
+  //SetMarkers();
   formFilters.reset();
-  SetMarkers();
 };
 
 
