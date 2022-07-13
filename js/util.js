@@ -1,6 +1,16 @@
-//import { SetMarkers } from './map.js';
-
 const ALERT_SHOW_TIME = 5000;
+
+/**
+ * Возвращает строку, содержащую переданное числительное + существительное в
+ * правильной форме
+ */
+const debounce = (callback, timeoutDelay) => {
+  let timeoutId;
+  return (...rest) => {
+    clearTimeout(timeoutId);
+    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+  };
+};
 
 /**
  * Возвращает строку, содержащую переданное числительное + существительное в
@@ -65,7 +75,6 @@ const formReset = () => {
   const form = document.querySelector('.ad-form');
   const formFilters = document.querySelector('.map__filters');
   form.reset();
-  //SetMarkers();
   formFilters.reset();
 };
 
@@ -127,4 +136,4 @@ const createErrorMessage = () => {
 };
 
 
-export { getNounCase, showAlert, getAddress, createSuccessMessage, createErrorMessage };
+export { getNounCase, showAlert, getAddress, createSuccessMessage, createErrorMessage, debounce };

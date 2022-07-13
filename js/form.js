@@ -1,6 +1,8 @@
 import { getNounCase, createErrorMessage } from './util.js';
 import { sendData } from './api.js';
-//import { mainMarker } from './map.js';
+//import { countRank, createFilterSample } from './filter.js';
+//import { createMarker} from './map.js';
+import { choosePhoto } from './picture.js';
 
 const MAX_ROOMS = 100;
 const MAX_PRICE = 100000;
@@ -210,5 +212,12 @@ const setFormSubmit = (onSuccess) => {
 };
 
 
-export { toggleStatus, setSlider, setValidators, setFormSubmit };
+const setFilters = (cb) => {
+  const mapFilters = document.querySelector('.map__filters');
+  mapFilters.addEventListener('change', () => {
+    cb();
+  });
+};
+
+export { toggleStatus, setSlider, setValidators, setFormSubmit, setFilters };
 
