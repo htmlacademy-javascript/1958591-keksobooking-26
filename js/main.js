@@ -1,21 +1,29 @@
-import { createAccomodations } from './mocks/data.js';
-import { toggleStatus, setSlider, setValidators, createMap, createMainMarker, createMarkerGroup, deleteMarkerGroup } from './form.js';
+import { getData } from './api.js';
+import { createSuccessMessage } from './util.js';
+import { renderMarkerGroup, filterMarkerGroup } from './map.js';
+import { toggleStatus, setSlider, setValidators, setFormSubmit, setFilters } from './form.js';
+import { debounce } from './util.js';
+import { renderPhoto } from './picture.js';
+
+const RERENDER_DELAY = 500;
 
 const ACCOMODATION_COUNT = 10;
-const MAIN_LAT = 35.68941;
-const MAIN_LNG = 139.69235;
-const PRECISION = 5;
-const SCALE = 12;
-
-const accomodations = createAccomodations(ACCOMODATION_COUNT);
 
 setSlider();
-toggleStatus(false);
+toggleStatus('ad-form', false);
+toggleStatus('map__filters', false);
 setValidators();
-const map = createMap(MAIN_LAT, MAIN_LNG, SCALE);
-const mainMarker = createMainMarker(map, MAIN_LAT, MAIN_LNG, PRECISION);
-const markerGroup = createMarkerGroup(accomodations, map);
 
-//deleteMarkerGroup(markerGroup);
+getData((accomodations) => {
+  const markerGroup = renderMarkerGroup(accomodations, ACCOMODATION_COUNT);
+  setFilters(debounce(
+    () => filterMarkerGroup(accomodations, ACCOMODATION_COUNT, markerGroup),
+    RERENDER_DELAY,
+  ));
+});
 
-export { markerGroup, mainMarker, deleteMarkerGroup };
+renderPhoto('#avatar', 'ad-form-header__preview');
+renderPhoto('#images', 'ad-form__photo');
+
+setFormSubmit(createSuccessMessage);
+

@@ -1,40 +1,11 @@
+import { getNounCase } from './util.js';
+
 const AccommodationType = {
   BUNGALOW: 'Бунгало',
   FLAT: 'Квартира',
   HOTEL: 'Отель',
   HOUSE: 'Дом',
   PALACE: 'Дворец'
-};
-
-/**
- * Возвращает строку, содержащую переданное числительное + существительное в
- * правильной форме
- * @param {String} numeral - числительное
- * @param {Massive} nounCases - массив строк из трех значений - существительное в именительном падеже, родительном падеже, во множественном числе
- * @returns {String} - искомая строка
- */
-const getNounCase = (numeral, nounCases) => {
-  if (numeral !== undefined) {
-    const twoDigitNumber = numeral.toString().substring(numeral.toString().length - 2);
-    const oneDigitNumber = numeral.toString().substring(numeral.toString().length - 1);
-    if ((twoDigitNumber > 10) && (twoDigitNumber < 15)) {
-      return `${numeral} ${nounCases[2]}`;
-    }
-    switch (oneDigitNumber) {
-      case '1':
-        return `${numeral} ${nounCases[0]}`;
-      case '2':
-        return `${numeral} ${nounCases[1]}`;
-      case '3':
-        return `${numeral} ${nounCases[1]}`;
-      case '4':
-        return `${numeral} ${nounCases[1]}`;
-      default:
-        return `${numeral} ${nounCases[2]}`;
-    }
-  } else {
-    return `неизвестное количество ${nounCases[2]}`;
-  }
 };
 
 /**
@@ -49,7 +20,6 @@ const fillContent = (elementParent, сhildSelector, childProperty, childFields, 
   let checkFields = true;
   childFields.forEach((childField) => {
     if (childField === undefined) {
-      //elementParent.querySelector(сhildSelector).classList.add('hidden');
       checkFields = false;
     }
   });
@@ -170,5 +140,6 @@ const createAccomodationPopup = ({ offer, author }) => {
   return accomodationElement;
 };
 
-export { createAccomodationPopup, getNounCase };
+
+export { createAccomodationPopup };
 
