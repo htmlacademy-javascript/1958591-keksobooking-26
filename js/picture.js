@@ -1,32 +1,26 @@
 const FILE_TYPES = ['gif', 'jpg', 'jpeg', 'png'];
 
-const choosePhoto = (fileChooser, preview) => {
+const renderPhoto = (fileChooserSelector, previewSelector) => {
+  let preview = document.querySelector(`.${previewSelector} img`);
+  const fileChooser = document.querySelector(fileChooserSelector);
   fileChooser.addEventListener('change', () => {
     const file = fileChooser.files[0];
     const fileName = file.name.toLowerCase();
     const matches = FILE_TYPES.some((it) => fileName.endsWith(it));
-    //Если нету фотоэлемента, его нужно сделать?
     if (matches) {
+      if (preview === null) {
+        const photoList = document.querySelector(`.${previewSelector}`);
+        const photoItem = document.createElement('img');
+        photoItem.alt = 'Фотография объекта';
+        photoItem.width = '70';
+        photoItem.height = '70';
+        photoList.append(photoItem);
+        preview = document.querySelector(`.${previewSelector} img`);
+      }
       preview.src = URL.createObjectURL(file);
     }
   });
 };
 
-
-const previewAvatar = document.querySelector('.ad-form-header__preview img');
-const fileChooserAvatar = document.querySelector('#avatar');
-choosePhoto(fileChooserAvatar, previewAvatar);
-
-const fileChooserOffer = document.querySelector('#images');
-
-
-const photoList = document.querySelector('.ad-form__photo');
-const photoItem = document.createElement('img');
-photoList.append(photoItem);
-const previewOffer = document.querySelector('.ad-form__photo img');
-
-choosePhoto(fileChooserOffer, previewOffer);
-
-
-export { choosePhoto };
+export { renderPhoto };
 

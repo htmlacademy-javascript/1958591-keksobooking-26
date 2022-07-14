@@ -1,8 +1,5 @@
 import { getNounCase, createErrorMessage } from './util.js';
 import { sendData } from './api.js';
-//import { countRank, createFilterSample } from './filter.js';
-//import { createMarker} from './map.js';
-import { choosePhoto } from './picture.js';
 
 const MAX_ROOMS = 100;
 const MAX_PRICE = 100000;

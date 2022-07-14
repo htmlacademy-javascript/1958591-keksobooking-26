@@ -94,7 +94,7 @@ const createMarker = (accomodation, markerGroup) => {
 };
 
 
-const filterMarkerGroup = (accomodations, accomodationCount, markerGroup ) => {
+const filterMarkerGroup = (accomodations, accomodationCount, markerGroup) => {
   markerGroup.clearLayers();
   const newSample = createFilterSample();
   accomodations
