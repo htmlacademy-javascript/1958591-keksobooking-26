@@ -140,6 +140,5 @@ const createAccomodationPopup = ({ offer, author }) => {
   return accomodationElement;
 };
 
-
 export { createAccomodationPopup };
 

@@ -1,14 +1,14 @@
 const ALERT_SHOW_TIME = 5000;
+const RERENDER_DELAY = 500;
 
 /**
- * Возвращает строку, содержащую переданное числительное + существительное в
- * правильной форме
+ * Устраняет дребезг. Функция взята из материалов курса
  */
-const debounce = (callback, timeoutDelay) => {
+const debounce = (callback) => {
   let timeoutId;
   return (...rest) => {
     clearTimeout(timeoutId);
-    timeoutId = setTimeout(() => callback.apply(this, rest), timeoutDelay);
+    timeoutId = setTimeout(() => callback.apply(this, rest), RERENDER_DELAY);
   };
 };
 
@@ -43,6 +43,11 @@ const getNounCase = (numeral, nounCases) => {
   }
 };
 
+/**
+ * Показывает блок с сообщением
+ * Функция взята из материалов курса
+ * @param {String} message - текст сообщения
+ */
 const showAlert = (message) => {
   const alertContainer = document.createElement('div');
   alertContainer.style.zIndex = '100';
@@ -71,17 +76,14 @@ const showAlert = (message) => {
  */
 const getAddress = (latitude, longitude, precision) => `${latitude.toFixed(precision)}, ${longitude.toFixed(precision)}`;
 
-const formReset = () => {
-  const form = document.querySelector('.ad-form');
-  const formFilters = document.querySelector('.map__filters');
-  form.reset();
-  formFilters.reset();
-};
-
-
+/**
+ * Проверяет, что нажатая клавиша - Esc.
+ */
 const isEscapeKey = (evt) => evt.key === 'Escape';
 
-
+/**
+ * Обработчик для закрытия окна Success клавишей Esc
+ */
 const onSuccessElementEscKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
@@ -89,13 +91,22 @@ const onSuccessElementEscKeydown = (evt) => {
   }
 };
 
+/**
+ * Очищает форму и фильтры, удаляет окно с сообщением об успехе и обработчик для закрытия окна клавишей Esc.
+ */
 function removeSuccessElement() {
   const successElement = document.querySelector('.success');
-  formReset();
+  const form = document.querySelector('.ad-form');
+  const mapFilter = document.querySelector('.map__filters');
+  form.reset();
+  mapFilter.reset();
   successElement.remove();
   document.removeEventListener('keydown', onSuccessElementEscKeydown);
 }
 
+/**
+ * Создает окно с сообщением об успехе. Устанавливает обработчики для закрытия окна.
+ */
 const createSuccessMessage = () => {
   const successMessageTemplate = document.querySelector('#success').content;
   const successMessageElement = successMessageTemplate.cloneNode(true);
@@ -108,6 +119,9 @@ const createSuccessMessage = () => {
   document.addEventListener('keydown', onSuccessElementEscKeydown);
 };
 
+/**
+ * Обработчик для закрытия окна Error клавишей Esc
+ */
 const onErrorElementEscKeydown = (evt) => {
   if (isEscapeKey(evt)) {
     evt.preventDefault();
@@ -115,23 +129,30 @@ const onErrorElementEscKeydown = (evt) => {
   }
 };
 
+/**
+ * Удаляет окно с сообщением об ошибке и обработчик для закрытия окна клавишей Esc
+ */
 function removeErrorElement() {
   const errorElement = document.querySelector('.error');
   errorElement.remove();
   document.removeEventListener('keydown', onErrorElementEscKeydown);
 }
 
+/**
+ * Создает окно с сообщением об ошибке. Устанавливает обработчики для закрытия окна
+ */
 const createErrorMessage = () => {
   const errorMessageTemplate = document.querySelector('#error').content;
   const errorMessageElement = errorMessageTemplate.cloneNode(true);
   document.body.append(errorMessageElement);
   const errorElement = document.querySelector('.error');
   const errorButton = document.querySelector('.error__button');
-  const onErrorElement = () => {
+  errorElement.addEventListener('click', () => {
     removeErrorElement();
-  };
-  errorElement.addEventListener('click', onErrorElement);
-  errorButton.addEventListener('click', onErrorElement);
+  });
+  errorButton.addEventListener('click', () => {
+    removeErrorElement();
+  });
   document.addEventListener('keydown', onErrorElementEscKeydown);
 };
 
