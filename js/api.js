@@ -1,7 +1,7 @@
 import { showAlert } from './util.js';
 
 const GET_ADDRESS = 'https://26.javascript.pages.academy/keksobooking/data';
-const SEND_ADDRESS = 'https://26.javascript.pages.academy/keksobooking';
+const SEND_ADDRESS = 'https://26.javascript.pages.academy/keksobooking1';
 
 /**
  * Получает данные с сервера

@@ -82,6 +82,7 @@ const setSlider = () => {
 
   slider.noUiSlider.on('slide', () => {
     priceField.value = slider.noUiSlider.get();
+    pristine.validate(priceField);
   });
 };
 
@@ -254,10 +255,10 @@ const fulfilFormReset = (cb) => {
     timeOutField.value = SampleForm.TIMEOUT;
     roomField.value = SampleForm.ROOMS;
     guestField.value = SampleForm.GUESTS;
-    priceField.value = SampleForm.PRICE;
     typeField.value = SampleForm.TYPE;
+    priceField.value = SampleForm.PRICE;
+    priceField.placeholder = MinPrice[typeField.value.toUpperCase()];
     descriptionField.value = SampleForm.DESCRIPTION;
-
     const featurefields = document.querySelectorAll('.features__checkbox');
     featurefields.forEach((feature) => { feature.checked = false; });
     pristine.reset();

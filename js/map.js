@@ -89,7 +89,6 @@ const createMarker = (accomodation, markerGroup) => {
       pinIcon,
     },
   );
-
   marker
     .addTo(markerGroup)
     .bindPopup(createAccomodationPopup(accomodation));
