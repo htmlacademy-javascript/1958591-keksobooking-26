@@ -1,7 +1,14 @@
 import { createAccomodationPopup } from './cards.js';
-import { toggleStatus } from './form.js';
+import { toggleFormStatus } from './form.js';
 import { getAddress } from './util.js';
-import { countRank, createFilterSample } from './filter.js';
+import { countFilterPoint, createFilterSample } from './filter.js';
+
+const MAIN_LAT = 35.68941;
+const MAIN_LNG = 139.69235;
+const PRECISION = 5;
+const SCALE = 12;
+
+const MAX_ACCOMODATION_COUNT = 10;
 
 const mainPinIcon = L.icon({
   iconUrl: './img/main-pin.svg',
@@ -15,11 +22,6 @@ const pinIcon = L.icon({
   iconAnchor: [10, 20],
 });
 
-const MAIN_LAT = 35.68941;
-const MAIN_LNG = 139.69235;
-const PRECISION = 5;
-const SCALE = 12;
-
 /**
 * Создает карту и возвращает ссылку нее.
 * @return {Object} map - ссылка на карту
@@ -27,7 +29,7 @@ const SCALE = 12;
 const createMap = () => {
   const map = L.map('map-canvas')
     .on('load', () => {
-      toggleStatus('ad-form', true);
+      toggleFormStatus('ad-form', true);
     })
 
     .setView({
@@ -93,63 +95,61 @@ const createMarker = (accomodation, markerGroup) => {
     .bindPopup(createAccomodationPopup(accomodation));
 };
 
-
-const filterMarkerGroup = (accomodations, accomodationCount, markerGroup) => {
+/**
+ * Фильтрует предложения жилья, создает маркеры и отрисовывает их на карте
+ * @param {Object} markerGroup - ссылка на слой с маркерами
+ * @param {Array} accomodations - массив объектов с характеристиками предложения жилья
+ */
+const renderFilteredMarkerGroup = (accomodations, markerGroup) => {
   markerGroup.clearLayers();
-  const newSample = createFilterSample();
-  accomodations
-    .slice()
-    .filter((accomodation) => countRank(accomodation, newSample) === newSample.rank)
-    .slice(0, accomodationCount)
-    .forEach((accomodation) => {
-      createMarker(accomodation, markerGroup);
-    });
+  const filterSample = createFilterSample();
+  let counterFitAccomodation = 0;
+  for (let i = 0; i < accomodations.length; i++) {
+    if (countFilterPoint(accomodations[i], filterSample) === filterSample.filterPoint) {
+      if (counterFitAccomodation >= MAX_ACCOMODATION_COUNT) {
+        break;
+      }
+      counterFitAccomodation += 1;
+      createMarker(accomodations[i], markerGroup);
+    }
+  }
 };
 
 /**
- * Отрисовывает группу маркеров на карте.
- * @param {param} map - ссылка на карту
+ *Создает маркеры и отрисовывает их на карте.
+ * @param {Object} map - ссылка на карту
  * @param {Array} accomodations - массив объектов с характеристиками предложения жилья
+ * @return {Object} markerGroup - ссылка на слой маркеров
  */
-const renderMarkerGroup = (accomodations, accomodationCount) => {
-  const map = createMap();
-  const mainMarker = createMainMarker(map);
+const renderMarkerGroup = (accomodations, map) => {
   const markerGroup = L.layerGroup().addTo(map);
-
-  const mapFilters = document.querySelector('.map__filters');
-  const form = document.querySelector('.ad-form');
-  const addressField = document.querySelector('#address');
-
   accomodations
-    .slice(0, accomodationCount)
+    .slice(0, MAX_ACCOMODATION_COUNT)
     .forEach((accomodation) => {
       createMarker(accomodation, markerGroup);
     });
-
-  toggleStatus('map__filters', true);
-
-  /**
-   * Возвращает в центр главный маркер и очищает слой с маркерами на карте при сбросе значений формы ввода.
-   */
-  form.addEventListener('reset', () => {
-    mainMarker.setLatLng(L.latLng(MAIN_LAT, MAIN_LNG));
-    addressField.value = getAddress(MAIN_LAT, MAIN_LNG, PRECISION);
-  });
-
-  /**
-   * Отрисовывает группу маркеров при сбросе значений формы с фильтрами.
-   */
-  mapFilters.addEventListener('reset', () => {
-    markerGroup.clearLayers();
-    addressField.value = getAddress(MAIN_LAT, MAIN_LNG, PRECISION);
-    accomodations
-      .slice(0, accomodationCount)
-      .forEach((accomodation) => {
-        createMarker(accomodation, markerGroup);
-      });
-  });
+  toggleFormStatus('map__filters', true);
 
   return markerGroup;
 };
 
-export { renderMarkerGroup, filterMarkerGroup, createMarker };
+/**
+ * Возвращает в центр главный маркер, сбрасывает фильтры и очищает слой с маркерами на карте.
+ * Отрисовывает маркеры (без фильтрации).
+ * @param {Object} markerGroup - ссылка на слой с маркерами
+ * @param {Object} markerGroup - ссылка на главный маркер
+ * @param {Array} accomodations - массив объектов с характеристиками предложения жилья
+ */
+const resetFilteredMarkerGroup = (accomodations, markerGroup, mainMarker) => {
+  mainMarker.setLatLng(L.latLng(MAIN_LAT, MAIN_LNG));
+  const mapFilter = document.querySelector('.map__filters');
+  markerGroup.clearLayers();
+  accomodations
+    .slice(0, MAX_ACCOMODATION_COUNT)
+    .forEach((accomodation) => {
+      createMarker(accomodation, markerGroup);
+    });
+  mapFilter.reset();
+};
+
+export { renderMarkerGroup, renderFilteredMarkerGroup, resetFilteredMarkerGroup, createMap, createMainMarker };

@@ -1,64 +1,70 @@
+const OFFER_PRICE_LOW = 10000;
+const OFFER_PRICE_HIGH = 50000;
+
 /**
  * Создает объект - образец для фильтрации
+ * @returns {object} filterSample - искомый объект
  */
 const createFilterSample = () => {
+  const typeFilter = document.querySelector('#housing-type');
+  const priceFilter = document.querySelector('#housing-price');
+  const roomFilter = document.querySelector('#housing-rooms');
+  const guestFilter = document.querySelector('#housing-guests');
   const featuresFilters = document.querySelectorAll('.map__checkbox');
+
   const checkedFeatures = [];
-  let maxRank = 0;
+  let maxPoint = 0;
   featuresFilters.forEach((featuresFilter) => {
     if (featuresFilter.checked === true) {
       checkedFeatures.push(featuresFilter.value);
-      maxRank = maxRank + 1;
+      maxPoint = maxPoint + 1;
     }
   });
   const filterSample = {
-    rank: '',
+    filterPoint: '',
     type: '',
     price: '',
     rooms: '',
     guest: '',
     features: checkedFeatures
   };
-
-  if (document.querySelector('#housing-type').value !== 'any') {
-    filterSample.type = document.querySelector('#housing-type').value;
-    maxRank = maxRank + 1;
+  if (typeFilter.value !== 'any') {
+    filterSample.type = typeFilter.value;
+    maxPoint = maxPoint + 1;
   }
-
-  if (document.querySelector('#housing-price').value !== 'any') {
-    filterSample.price = document.querySelector('#housing-price').value;
-    maxRank = maxRank + 1;
+  if (priceFilter.value !== 'any') {
+    filterSample.price = priceFilter.value;
+    maxPoint = maxPoint + 1;
   }
-
-  if (document.querySelector('#housing-rooms').value !== 'any') {
-    filterSample.rooms = document.querySelector('#housing-rooms').value;
-    maxRank = maxRank + 1;
+  if (roomFilter.value !== 'any') {
+    filterSample.rooms = roomFilter.value;
+    maxPoint = maxPoint + 1;
   }
-
-  if (document.querySelector('#housing-guests').value !== 'any') {
-    filterSample.guest = document.querySelector('#housing-guests').value;
-    maxRank = maxRank + 1;
+  if (guestFilter.value !== 'any') {
+    filterSample.guest = guestFilter.value;
+    maxPoint = maxPoint + 1;
   }
+  filterSample.filterPoint = maxPoint;
 
-  filterSample.rank = maxRank;
   return filterSample;
-
 };
 
-const countRank = ({ offer }, filterSample) => {
-
+/**
+ * Вычисляет совпадение переданного объекта с образцом для фильтрации
+ * @returns {object} filterSample - искомый объект
+ */
+const countFilterPoint = ({ offer }, filterSample) => {
   let rank = 0;
-
   if ((offer.type !== undefined) && (offer.type === filterSample.type)) {
     rank += 1;
   }
-  if ((offer.price !== undefined) && (filterSample.price === 'low') && (offer.price < 10000)) {
+  if ((offer.price !== undefined) && (filterSample.price === 'low') && (offer.price < OFFER_PRICE_LOW)) {
     rank += 1;
   }
-  if ((offer.price !== undefined) && (filterSample.price === 'high') && (offer.price > 50000)) {
+  if ((offer.price !== undefined) && (filterSample.price === 'high') && (offer.price > OFFER_PRICE_HIGH)) {
     rank += 1;
   }
-  if ((offer.price !== undefined) && (filterSample.price === 'middle') && (offer.price >= 10000) && (offer.price <= 50000)) {
+  if ((offer.price !== undefined) && (filterSample.price === 'middle') && (offer.price >= OFFER_PRICE_LOW) && (offer.price <= OFFER_PRICE_HIGH)) {
     rank += 1;
   }
   if ((offer.rooms !== undefined) && (offer.rooms === +filterSample.rooms) && (offer.rooms !== 0)) {
@@ -67,12 +73,8 @@ const countRank = ({ offer }, filterSample) => {
   if ((offer.guests !== undefined) && (offer.guests === +filterSample.guest) && (offer.guests !== 0)) {
     rank += 1;
   }
-
   if (offer.features !== undefined) {
     filterSample.features.forEach((filter) => {
-      //if (offer.features.some((feature) => filter === feature)) {
-      //   rank += 1;
-      //  }
       offer.features.forEach((feature) => {
         if (filter === feature) {
           rank += 1;
@@ -83,4 +85,4 @@ const countRank = ({ offer }, filterSample) => {
   return rank;
 };
 
-export { countRank, createFilterSample };
+export { countFilterPoint, createFilterSample };
